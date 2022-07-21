@@ -10,7 +10,7 @@ video.h cabecera con prototipos de funciones
 
 #include <string.h>
 #include <SDL/SDL_image.h>
-#include <SDL_rotozoom.h>
+#include <SDL/SDL_rotozoom.h>
 #include "math-sll.h"
 #ifdef GP2X                 // Handheld typical resolution
     #define WIDTH 320

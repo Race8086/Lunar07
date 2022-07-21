@@ -4,10 +4,10 @@
 	<string.h>
 	<SDL/SDL.h>
 
-1658251229 source:/home/race/Lunar22/lunar.c
+1658422175 source:/home/race/Lunar22/lunar.c
 	"lunar.h"
 	"video.h"
-	<SDL_gfxPrimitives.h>
+	<SDL/SDL_gfxPrimitives.h>
 
 1656959540 /home/race/Lunar22/lunar.h
 	<stdio.h>
@@ -29,14 +29,14 @@
 
 997820930 /home/race/Lunar22/DT_drawtext.h
 
-1658251714 /home/race/Lunar22/video.h
+1658422160 /home/race/Lunar22/video.h
 	<stdio.h>
 	<stdlib.h>
 	<unistd.h>
 	<SDL/SDL.h>
 	<string.h>
 	<SDL/SDL_image.h>
-	<SDL_rotozoom.h>
+	<SDL/SDL_rotozoom.h>
 	"math-sll.h"
 
 1658251685 source:/home/race/Lunar22/video.c

@@ -33,7 +33,7 @@
 			<Add option="`sdl-config --cflags`" />
 		</Compiler>
 		<Linker>
-			<Add option="`sdl-config --libs` -lm -lSDL_image  -lSDL_mixer -lSDL_gfx" />
+			<Add option="`sdl-config --libs` -lm -lSDL -lSDL_image  -lSDL_mixer -lSDL_gfx" />
 		</Linker>
 		<Unit filename="DT_drawtext.c">
 			<Option compilerVar="CC" />

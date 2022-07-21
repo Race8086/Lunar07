@@ -135,7 +135,7 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 
 #include "lunar.h"
 #include "video.h"
-#include <SDL_gfxPrimitives.h>
+#include <SDL/SDL_gfxPrimitives.h>
 #define FUEL 200
 #define MAX_V_Y 10
 #define MAX_V_X 3
