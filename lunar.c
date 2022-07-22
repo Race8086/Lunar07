@@ -710,6 +710,8 @@ void reset_eventos(int action[])
 {
  action[right_pressed] = 0;
  action[left_pressed] = 0;
+ action[keyo_pressed] = 0;
+ action[keyp_pressed] = 0;
  //action[up_pressed] = 0;
  //action[down_pressed] = 0;
  //action[zoom_pressed] = 0;
@@ -774,7 +776,8 @@ while (SDL_PollEvent(&event) > 0) /*1*/
     		else if (key == SDLK_w)   { action[zoom_pressed] = 1;   }  /* Zoom_in */
     		else if (key == SDLK_e)   { action[shift_pressed] = -1; }  /* shift left  */
     		else if (key == SDLK_d)   { action[shift_pressed] = 1;  }  /* shift right */
-
+    		else if (key == SDLK_o)   { action[keyo_pressed] = 1; }  /* tecla o */
+    		else if (key == SDLK_p)   { action[keyp_pressed] = 1;  }  /* tecla p */
     	}
     	else if (event.type == SDL_KEYUP)  //--------------- TECLA LIBERADA
     	{
@@ -786,6 +789,8 @@ while (SDL_PollEvent(&event) > 0) /*1*/
         	else if (key == SDLK_w)    { action[zoom_pressed] = 0;	}
             else if (key == SDLK_e)    { action[shift_pressed] = 0; }
         	else if (key == SDLK_d)    { action[shift_pressed] = 0;	}
+        	else if (key == SDLK_o)   { action[keyo_pressed] = 0; }  /* tecla o */
+    		else if (key == SDLK_p)   { action[keyp_pressed] = 0;  }  /* tecla p */
         	if (key == SDLK_LALT)      { action[shift_pressed] = 0; }
     	}
     }
@@ -1193,7 +1198,7 @@ int game(void)
   int h,hx,hy;      // Altura restante para llegar al suelo
   int scale;        // Nivel de zoom actual
   int scale_old;    // Nivel de zoom anterior
-  int actiond[6];   // Lista de posibles acciones en el juego
+  int actiond[8];   // Lista de posibles acciones en el juego
   int shift_dir;    // Sentido del scroll
  // float xf,yf;      // Variables auxiliareas para gestión pantalla
   float dtime;       // diferencial de tiempo entre cada iteración
@@ -1293,8 +1298,18 @@ int game(void)
        scale_old = scale;
     }
     actiond[zoom_pressed]=0;
-
     shift_dir = 0;
+// desplazamiento forzado del lander en horizontal
+    if (actiond[keyo_pressed]){
+
+        x_pos = x_pos -40;
+        actiond[keyo_pressed]=0;
+    }
+    if (actiond[keyp_pressed]){
+
+        x_pos = x_pos + 40;
+        actiond[keyp_pressed]=0;
+    }
     scroll_check(&Scx);
     /*
     fSct = (x_pos/zoom[scale])- Scx;
@@ -1305,6 +1320,7 @@ int game(void)
     if (fSct >= WIDTH -32) shift_dir = 1; // Ajuste del scroll a la escala
     if (fSct <= 32) shift_dir = -1;
 */
+    printf ("x lander = %f (x screen) = %f\n",x_pos, x_pos/zoom[scale]);
     scroll_manual(&actiond[shift_pressed], zoom[scale],x_pos);
 
     /**** Ojo con esto revisar ****************************************
