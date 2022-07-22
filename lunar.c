@@ -129,8 +129,7 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 - Ajustado aumento zoom del lander durante la simulación
 - TODO
      La variable dx se desborda en un momento dado, depurar
-     Comprobar el desplazamiento del escenario en escala PC
-
+     Comprobar el desplazamiento del escenario en escala PC.
 */
 
 #include "lunar.h"
@@ -224,30 +223,28 @@ int cfg_var[4]=
 enum {IDIOMA,MUSICA,ROZ,FIS};       // Enumerado para las configuraciones
 /*************** VARIABLES DEL MODELO *****************************************/
 /*************** Fisica *******************************************************/
-#define PI 3.14159             // Constante PI
+#define PI 3.14159          // Constante PI
 #define U 7000.0            // Velocidad escape gases ( m/s)
-#define G  4.67              // Gravedad Lunar
+#define G  4.67             // Gravedad Lunar
 #define y0 2500             // Altura inicial
-
-
 /*************** Posicionamiento X,Y  *****************************************/
-int x, y;            // Posición absoluta del LEM , int
-int angle;           // Angulo de inclinación del LEM
-float t;             // tiempo universal
-extern int zoom[5];  // Niveles de Zoom ( declarado en video.c)
-float m0;            // Masa inicial del LEM
+int x, y;                   // Posición absoluta del LEM , int
+int angle;                  // Angulo de inclinación del LEM
+float t;                    // tiempo universal
+extern int zoom[5];         // Niveles de Zoom ( declarado en video.c)
+float m0;                   // Masa inicial del LEM
 /***************** Variable con modelo ecuaciones diferenciales ******************/
 #define CNV 0.0174532928;   // factor conversión grados a radianes pi/180
-float x_thrust,y_thrust; // Componentes x,y del vector impulso
-float x_a,y_a; // Componentes x,y del vector aceleración
-float x_vel,y_vel; // Componentes x,y del vector velocidad
-float x_vant,y_vant; // Componentes x,y del vector velocidad
-float x_pos,y_pos; // Componentes x,y de posición
-float x_posant,y_posant; // Componentes x,y de posición
+float x_thrust,y_thrust;    // Componentes x,y del vector impulso
+float x_a,y_a;              // Componentes x,y del vector aceleración
+float x_vel,y_vel;          // Componentes x,y del vector velocidad
+float x_vant,y_vant;        // Componentes x,y del vector velocidad
+float x_pos,y_pos;          // Componentes x,y de posición
+float x_posant,y_posant;    // Componentes x,y de posición
 /**************** Combustible y motores ***************************************/
-float fuel;       // Combustible Kg;
-int mu=3900;         // Carga util Kg
-float impulso[] =    // Impulso de los motores ( 10 niveles ) en Kg/s
+float fuel;                 // Combustible Kg;
+int mu=3900;                // Carga util Kg
+float impulso[] =           // Impulso de los motores ( 10 niveles ) en Kg/s
 {
       0.0,
       1.0,
@@ -262,12 +259,12 @@ float impulso[] =    // Impulso de los motores ( 10 niveles ) en Kg/s
 };
 
 /*************** Variables gestión representación en pantalla *****************/
-float Scx,           // origen del viewport para centrar la cámara en zonas de
-      Scy;           // mayor superficie que la pantalla
-float x_scroll,      // scroll en eje X
-      y_scroll;      // scroll en eje Y
-int   scroll=0;      // Flag scroll
-float fSct;
+float Scx,                  // origen del viewport para centrar la cámara en zonas de
+      Scy;                  // mayor superficie que la pantalla
+float x_scroll,             // scroll en eje X
+      y_scroll;             // scroll en eje Y
+int   scroll=0;             // Flag scroll
+float fSct;                 // tbd
 
 /**************** Datos del terreno, bases , LEM , espacio ********************/
 int res_x = 50;      // Resolucion eje X
@@ -1065,29 +1062,6 @@ void fisica(float thrust,int gangle, float dt)
  y_posant = y_pos;
 }
 
-/******************************************************************************
-* auto_zoom : Ajusta el nivel de zoom en función de la distancia a la superficie
-*   Entradas : h: Distancia a la superfice
-*               scale: Zoom actual
-*               scale_old: Zoom anterior
-*   Salidas  : 0 : no se hace nada
-*              -1 : zoom in
-*              1 : zoom out
-*
-*
-*******************************************************************************/
-
-int auto_zoom(int hl)
-{
-  //  int static flip=0; /* NOUSE */
-    int scale=1;
-
-    if (hl > 600) scale = 4;
-    else if ((hl<=600)&& (hl>300)) scale = 3;
-    else if ((hl<=300)&& (hl>100)) scale = 2;
-    else if (hl<=100) scale =1;
-    return scale;
-}
 
 
 /*********************************************************************
@@ -1325,9 +1299,9 @@ int game(void)
     //h = y - (moon_a[x/50].y);
     check_dist(&hx,&hy,x,y,moon_a);
     h = hy;
-    scale = auto_zoom(h);
     /****************** Ajuste de cámara en función de la distancia al suelo **/
-    //if (check_scale(actiond[zoom_pressed],&scale,&scale_old)) update_camera(x,y,scale,&Scx,&Scy);
+    //scale = zoom_auto(h);
+    scale = zoom_manual(actiond[zoom_pressed],scale);
     if (scale != scale_old)
     {
        update_camera(x,y,scale,&Scx,&Scy);

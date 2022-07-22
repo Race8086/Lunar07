@@ -81,7 +81,8 @@ void draw_centered_text(char * str, int y, int s, color_type c);
 
 /*** Gestión de vetana de visualización **/
 void update_camera(int xl, int yl, int scale, float *pscx,float *pscy);
-int check_scale(int hh,int *pscale, int *pscale_old);
+int zoom_manual(int hh,int pscale);
+int zoom_auto(int hl);
 
 /*** Funciones para el terreno, las bases, el LEM y los indicadores ***/
 

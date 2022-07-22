@@ -35,8 +35,8 @@ Uint32 MUL320[240]={
 // Zoom levels
 
 /*
-* El nivel de zoom debe ser tal que en el ˙ltimo nivel (4) la x m·x se corresponda con WIDTH
-* se debe pues recalcular el nivel de zoom en funciÛn de la escala
+* El nivel de zoom debe ser tal que en el √∫ltimo nivel (4) la x m√°x se corresponda con WIDTH
+* se debe pues recalcular el nivel de zoom en funci√≥n de la escala
 * GP2X 320 x 240 --> 6400 / 320 = 20
 * PC   640 x 480 --> 6400 / 640 = 10
 */
@@ -457,7 +457,7 @@ color_type mkcolor(int r, int g, int b)
 }
 
 /*******************************************************************************************/
-// Funciones de pintado de lÌneas
+// Funciones de pintado de l√≠neas
 /*******************************************************************************************/
 
 /* funciones de apoyo */
@@ -505,7 +505,7 @@ static inline int clip(int * x1, int * y1, int * x2, int * y2)
    }
 }
 
-/**** Dibuja una lÌnea en vertical ****/
+/**** Dibuja una l√≠nea en vertical ****/
 
 void drawvertline(int x, int y1, Uint8 col, int y2)
 {
@@ -591,7 +591,7 @@ void sdl_drawline(int x1, int y1, color_type c1,
 void draw_line(int x1, int y1, color_type c1,
 	       int x2, int y2, color_type c2)
 {
-  //int i=MOON_MAX_X; // distancia m·xima del terreno
+  //int i=MOON_MAX_X; // distancia m√°xima del terreno
 
   sdl_drawline(x1, y1, c1, x2, y2, c2);
 
@@ -615,9 +615,9 @@ void draw_line(int x1, int y1, color_type c1,
 }
 /*****************************************************************************
 *  draw_line2
-*  Dibuja una lÌnea, pero tiene en cuenta el scroll
+*  Dibuja una l√≠nea, pero tiene en cuenta el scroll
 *  entre los puntos (x1,y1) y (x2,y2)
-*  los par·metros c1 y c2 identifican el color de cada punto
+*  los par√°metros c1 y c2 identifican el color de cada punto
 *  shift : Flag de desplazamiento 1 Si , 0 No
 ******************************************************************************/
 
@@ -652,7 +652,7 @@ void draw_line2(int x1, int y1, color_type c1,
 *   c2	: color 2
 *   cx	: Punto central, coordenada x
 *   cy	: Punto central, coordenada y
-*   a	: angulo de referencia ( 90∫ vertical )
+*   a	: angulo de referencia ( 90¬∫ vertical )
 *
 *******************************************************************************/
 
@@ -794,7 +794,7 @@ void draw_terrain(terrain t_a[],int scr,int level)
 
 
 /***********************************************************************
-*Draw Lander : Dibuja el mÛdulo lunar
+*Draw Lander : Dibuja el m√≥dulo lunar
 * lander : Array con los vectores para dibujar el lander
 * x0 : Coordenada x del centro del gravedad del lander
 * yo : Coordenada y del centro del gravedad del lander
@@ -837,10 +837,10 @@ void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, int r,int le
 
 
 /***********************************************************************
-*Draw explo : Dibuja explosiÛn del mÛdulo lunar
-* l_exp : Array con los vectores para dibujar la explosiÛn
-* x0 : Coordenada x del centro de la explosiÛn
-* yo : Coordenada y del centro de la explosiÛn
+*Draw explo : Dibuja explosi√≥n del m√≥dulo lunar
+* l_exp : Array con los vectores para dibujar la explosi√≥n
+* x0 : Coordenada x del centro de la explosi√≥n
+* yo : Coordenada y del centro de la explosi√≥n
 * angle2: Angulo para rotar la figura
 * r  : factor de aumento
 * level : Nivel de zoom del escenario
@@ -885,7 +885,7 @@ void draw_bases(landing_zone bs[],int scr,int level)
     int i_end;
     color_type color;
 
-    i_end = MOON_MAX_X/zoom[level];  // longitud m·xima del terreno elegido
+    i_end = MOON_MAX_X/zoom[level];  // longitud m√°xima del terreno elegido
 
     for (i=0;i<6;i++)
     {
@@ -968,8 +968,8 @@ void draw_score(float lfuel,int lhy,int  lhx,int lym,int lxm)
 
 /*********************************************************************
 * void draw_fuel : un contador de barras simple de 10 posiciones con color
-*  entradas  : nivel : posiciÛn de los motores 0-9
-*              x,y : PosiciÛn x, y de commienzo del contador
+*  entradas  : nivel : posici√≥n de los motores 0-9
+*              x,y : Posici√≥n x, y de commienzo del contador
 **********************************************************************
 */
 
@@ -1003,10 +1003,10 @@ void draw_fuel ( int nivel, int x, int y)
 
 
 /**********************************************************************************************
-* void update_camera : Cambia la posiciÛn de la ventana de visualizaciÛn en funciÛn de la posiciÛn
+* void update_camera : Cambia la posici√≥n de la ventana de visualizaci√≥n en funci√≥n de la posici√≥n
 * de la nave si es preciso un cambio de escala
-* xl : posiciÛn x absoluta de la nave en el momento del cambio de escala
-* yl : posiciÛn y absoluta de la nave en el momento del cambio de escala
+* xl : posici√≥n x absoluta de la nave en el momento del cambio de escala
+* yl : posici√≥n y absoluta de la nave en el momento del cambio de escala
 * pscx : puntero a la variable Scx
 * pscy puntero a la variable Scy
 ***********************************************************************************************/
@@ -1020,7 +1020,7 @@ if (scale!=LEVEL)
 {
 xl = xl/zoom[scale];
 yl = yl/zoom[scale];
-// Calcular el nuevo origen para la ventana de visualizaciÛn
+// Calcular el nuevo origen para la ventana de visualizaci√≥n
 *pscx = xl -(WIDTH/2);
 *pscy = yl -(HEIGHT/2);
 }
@@ -1031,9 +1031,34 @@ else  // No hace falta centrar imagen
 };
 }
 
+/******************************************************************************
+* zoom_auto : Ajusta el nivel de zoom en funci√≥n de la distancia a la superficie
+*   Entradas : h: Distancia a la superfice
+*               scale: Zoom actual
+*               scale_old: Zoom anterior
+*   Salidas  : 0 : no se hace nada
+*              -1 : zoom in
+*              1 : zoom out
+*
+*
+*******************************************************************************/
+
+int zoom_auto(int hl)
+{
+  //  int static flip=0; /* NOUSE */
+    int scale=1;
+
+    if (hl > 600) scale = 4;
+    else if ((hl<=600)&& (hl>300)) scale = 3;
+    else if ((hl<=300)&& (hl>100)) scale = 2;
+    else if (hl<=100) scale =1;
+    return scale;
+}
+
+
 /*******************************************************************************************************
-*	int check_scale: Comprueba en funciÛn de la distancia a la superficie del terreno si es necesario
-*	cambiar la escala de representaciÛn
+*	int zoom_manual: Comprueba en funci√≥n de la distancia a la superficie del terreno si es necesario
+*	cambiar la escala de representaci√≥n
 *	hh : Nivel de zoom seleccionado 1: Zoom in
 *                                  -1: Zoom out
 *                                   0: no hace nada
@@ -1042,12 +1067,11 @@ else  // No hace falta centrar imagen
 *
 ********************************************************************************************************/
 
-int check_scale(int hh,int *pscale, int *pscale_old)
+int zoom_manual(int hh,int pscale)
 {
 int s; // Variable auxiliar
 //int static flip = 0;
-s =*(pscale);
-
+s =pscale;
 if (hh==1)
 	{
 		s++;
@@ -1058,22 +1082,23 @@ else if (hh ==-1)
 		s--;
 		if (s<LEVEL-3) s=LEVEL-3;
 	};
+/*
 if (s!=*pscale)
 {
 	*(pscale_old)=*(pscale);
 	*(pscale)=s;
-	s=1;
+
 }
 else
 	s=0;
 
-
+*/
 return s;
 }
 
 
 /*******************************************************************
-* draw_image : Rutina generica para volcar im·genes en la pantalla
+* draw_image : Rutina generica para volcar im√°genes en la pantalla
 *                activa
 * entradas:      cual : nombre del fichero que contiene la imagen
 *                xi,yi : coordenas relativas a la pantalla activa
@@ -1086,7 +1111,7 @@ void draw_image(char *cual,int xi,int yi)
 // int i;
  SDL_Surface *tmp;	   	// Superficie temporal para colocar la imagen
  SDL_Surface *image;  	// Superfice final de la imagen
- SDL_Rect dest;			// UbicaciÛn de la imagen en la pantalla activa
+ SDL_Rect dest;			// Ubicaci√≥n de la imagen en la pantalla activa
  int size = WIDTH / ASPECT;
  tmp = IMG_Load(cual);					// Carga imagen y la formatea
  if (tmp!=NULL)

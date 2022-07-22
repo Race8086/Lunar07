@@ -56,7 +56,6 @@
 #define BOTTOM_EDGE 0x0008
 
 
-
 /* Types: */
 
 typedef struct letter_type {
@@ -90,7 +89,3 @@ typedef struct bit_type {
 } bit_type;
 
 enum {left_pressed,right_pressed,up_pressed,down_pressed,zoom_pressed,shift_pressed};
-
-
-
-
