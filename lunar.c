@@ -698,14 +698,12 @@ for (i=0; i<6;i++)
   //fprintf(stderr,"score=%d\n",score);
 }
 
-
 static inline void reset_level(void)
 {
 
   sprintf(zoom_str, "LEVEL %d", level);
   text_zoom = ZOOM_START;
 }
-
 
 void reset_eventos(int action[])
 
@@ -719,7 +717,6 @@ void reset_eventos(int action[])
  //action[shift_pressed] = 0;
  //action[shift_pressed] = 0;
 }
-
 
 /******************************************************
 * maneja_eventos: función para la lectura del teclado /joystick
@@ -960,7 +957,6 @@ float check_fuel(float thrust, float dt)
     return dfuel;
 }
 
-
 /***********************************************************************
 * check_dist: Calcula distancia al terreno
 *   Entradas : x0: Posicion X absoluta
@@ -1014,9 +1010,40 @@ else
 
 }
 
+void scroll_manual(int *accion, int lvl_zoom,float _xf){
+
+    if (*accion)
+    {
+      x_scroll = (float)(50 * *accion)/lvl_zoom; // toma el sentido del desplazamiento
+      Scx = Scx  + x_scroll;
+      /*
+        No podemos incrementar indefinidamente Scx en un scroll contínuo cuando hemos dado la vuelta a la superfice
+        hay que inicializar Scx al desplazamiento inicial cuando se genero el viewport.
+        La siguiente secuencia solo sirve en la escala máxima, donde da la casualidad que Scx = 0;
+      */
+      if (Scx>=MOON_MAX_X/lvl_zoom)
+      {
+           printf("Hemos dado la vuelta\n");
+           Scx =0;
+       };
+      _xf = _xf + x_scroll*lvl_zoom;
+      *accion = 0;
+    }
+    else x_scroll =0;   // Reajusta valores para dar sensación de escenario continuo
+
+}
+
+void scroll_auto(){
 
 
+}
 
+void scroll_check(float *Scx){
+
+printf("Scx = %f\n",*Scx);
+//if (*Scx > WIDTH) *Scx = WIDTH - *Scx;
+
+}
 /***********************************************************************
 * fisica : Calcula los vecrtores  aceleración, velocidad y la posición
 *  Entradas : impulso: Impulso instantaneo programado
@@ -1061,8 +1088,6 @@ void fisica(float thrust,int gangle, float dt)
  x_posant = x_pos;
  y_posant = y_pos;
 }
-
-
 
 /*********************************************************************
 * int draw_result : Genera los mensajes tras el alunizaje
@@ -1139,7 +1164,6 @@ int draw_result (int gas,int scale,int result)
   return d;
 }
 
-
 /*******************************************************************************
 * game () : Implementación del modelo de alunizaje
 *          Inicializa variables
@@ -1158,60 +1182,22 @@ int draw_result (int gas,int scale,int result)
 *                              Pinta LEM
 *                 Gestión alunizaje
 *           hasta fin ( abandona, exito, fracaso)
-
-     #ifdef DEP
-        sprintf(svar[0],"scale %d",scale);
-        sprintf(svar[1],"zoom %d",zoom[scale]);
-        sprintf(svar[2],"yf %4.1f",y_pos);
-        sprintf(svar[3],"thrust %2.3f",impulso[gas]);
-        sprintf(svar[4],"fuel %4.0f",fuel);
-        sprintf(svar[5],"v_y %4.1f",*d_y);
-        sprintf(svar[6],"dt %4.6f",dt);
-        sprintf(svar[7],"angle%3.2d",langle);
-        sprintf(svar[8],"%.6d",variable);
-        sprintf(svar[9],"%.6d",variable);
-     #endif
-#ifdef DEP
-        i = 30;
-        DT_DrawText(svar[0], screen, DT_font, 0, 0 + i );
-        DT_DrawText(svar[1], screen, DT_font, 0, 14 + i );
-        DT_DrawText(svar[2], screen, DT_font, 0, 28 + i );
-        DT_DrawText(svar[3], screen, DT_font, 0, 42 + i );
-        DT_DrawText(svar[4], screen, DT_font, 0, 56 + i );
-        DT_DrawText(svar[5], screen, DT_font, 0, 70 + i );
-        DT_DrawText(svar[6], screen, DT_font, 0, 84 + i );
-        DT_DrawText(svar[7], screen, DT_font, 0, 98 + i );
-        DT_DrawText(svar[8], screen, DT_font, 0, 112 + i);
-        DT_DrawText(svar[9], screen, DT_font, 0, 126 + i);
-#endif
-
-
-
 *******************************************************************************/
 int game(void)
 {
   int done, quit;
 
-//  Uint64 t0;		// Tiempo de referencia
   Uint64 curr_time;
   Uint64 prev_time;
-//  char str[10];
   int gas;          // nivel de impulso que se da al LEM
   int h,hx,hy;      // Altura restante para llegar al suelo
   int scale;        // Nivel de zoom actual
   int scale_old;    // Nivel de zoom anterior
   int actiond[6];   // Lista de posibles acciones en el juego
   int shift_dir;    // Sentido del scroll
-  float xf,yf;      // Variables auxiliareas para gestión pantalla
- // float v,vant;
+ // float xf,yf;      // Variables auxiliareas para gestión pantalla
   float dtime;       // diferencial de tiempo entre cada iteración
-
-  // auxiliares
-//  int xx;
-//  int yy;
   int j;
-  //float acc=0;
-  //int flag=0;
   /***************** Inicialización de variables ***************************/
   done = 0;
   quit = 0;
@@ -1224,7 +1210,6 @@ int game(void)
   player_alive = 1;
   player_die_timer = 0;
   angle = 90;
- // xx=0;     	yy=0;
   Scx =0;     Scy = 0;
   fSct =0;
   x_scroll=0; y_scroll=0;
@@ -1290,11 +1275,11 @@ int game(void)
     curr_time = SDL_GetTicks();              // Calcular
     dtime = curr_time - prev_time;           // el paso
     prev_time = curr_time;                   //  del iempo
+    /****** OJO FISICA COMENTADA *****
     //fisica(impulso[gas],angle,dtime/1000);   //  acc, vel, desp, consumo de fuel
-    xf = x_pos;
-    yf = y_pos;
-    x = (int)round(xf);
-    y = (int)round(yf);
+    **********************************/
+    x = (int)round(x_pos);
+    y = (int)round(y_pos);
     // Comprueba distancia eje Y
     //h = y - (moon_a[x/50].y);
     check_dist(&hx,&hy,x,y,moon_a);
@@ -1308,39 +1293,31 @@ int game(void)
        scale_old = scale;
     }
     actiond[zoom_pressed]=0;
-    fSct = (xf/zoom[scale])- Scx;
+
+    shift_dir = 0;
+    scroll_check(&Scx);
+    /*
+    fSct = (x_pos/zoom[scale])- Scx;
     if (fSct<0) fSct = fSct + MOON_MAX_X/zoom[scale];
     else if (fSct>WIDTH) fSct = fSct - MOON_MAX_X/zoom[scale];
 
     // Check if scroll needed
     if (fSct >= WIDTH -32) shift_dir = 1; // Ajuste del scroll a la escala
     if (fSct <= 32) shift_dir = -1;
-    if (actiond[shift_pressed])
-    {
-      x_scroll = (float)(5* shift_dir)/zoom[scale]; // toma el sentido del desplazamiento
-      Scx = Scx  + x_scroll;
-      /*
-        No podemos incrementar indefinidamente Scx en un scroll contínuo cuando hemos dado la vuelta a la superfice
-        hay que inicializar Scx al desplazamiento inicial cuando se genero el viewport.
-        La siguiente secuencia solo sirve en la escala máxima, donde da la casualidad que Scx = 0;
-      */
-      if (Scx>=MOON_MAX_X/zoom[scale])
-      {
-           printf("Hemos dado la vuelta\n");
-           Scx =0;
-       };
-      xf = xf + x_scroll*zoom[scale];
-      actiond[shift_pressed] = 0;
-    }
-    else x_scroll =0;   // Reajusta valores para dar sensación de escenario continuo
-    if (xf<=0) xf = xf + MOON_MAX_X;
-    else if (xf>=MOON_MAX_X) xf = xf -MOON_MAX_X;
-    x = (int)round(xf);
-    y = (int)round(yf);
+*/
+    scroll_manual(&actiond[shift_pressed], zoom[scale],x_pos);
 
+    /**** Ojo con esto revisar ****************************************
+    // Reajusta valores para dar sensación de escenario continuo
+    if (x_pos<=0) x_pos = x_pos + MOON_MAX_X;
+    else if (x_pos>=MOON_MAX_X) x_pos = x_pos -MOON_MAX_X;
+    ******************************************************************/
+    x = (int)round(x_pos);
+    y = (int)round(y_pos);
+   /**** Actualización de la pantalla *********************************/
    if (if_frame)               // Si toca volcar a pantalla
     {
-     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // LimpiaPantalla
+     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // Limpia Pantalla
      draw_terrain(moon_a,0,scale);                                      // Dibuja Terreno
      draw_bases(base,0,scale);                                          // Dibuja Bases
      draw_stars(star,scale);                                            // Dibuja estrellas
@@ -1352,16 +1329,16 @@ int game(void)
      j = check_ground(h,hx,x_vel, y_vel,1);
      if (j)
      {
-             if (j == -1) done = 1;
-             else done = 2;
-             if (done == 2)
-             {
-                       add_score(x,1,base);
+        if (j == -1) done = 1;
+        else {
+            done = 2;
+            add_score(x,1,base);
              }
      }
      /******************/
      SDL_Flip(screen);
      SDL_Delay(1);
+
 
      }
     if_frame=wait_fps();
