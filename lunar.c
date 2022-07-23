@@ -139,6 +139,13 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 - Incorporadas teclas o-p para desplazar en eje x posición
   absoluta del Lem
  - Abierto branch : Autoscroll para siguientes modificaciones en scroll
+ 23/7/2022
+
+ - Se deja habilitado sólo el scroll manual ( teclas e-d) y el zoom manual (teclas w -s )
+ - Se elimina todo el codigo desarrollado para scroll automatico en todas las escalas, para
+   replantearlo desde cero.
+ - Se ha detectado que el desbordamiento a en la distancia al terreno se desborda en la zona de
+   las bases de alunizaje.
 */
 
 #include "lunar.h"
@@ -1030,82 +1037,46 @@ else
 
 void scroll_manual(int *accion, int escala, int lvl_zoom,float _xf){
 
-float check_point;            // Punto donde se cierra el terreno
-int   Scx_point;
+float check_point;
+
     if (*accion)
     {
-      if (escala == LEVEL) {        // partimos de Scx=0
-         check_point = MOON_MAX_X/lvl_zoom;
-         Scx_point =0;
-      }
-      else{
-         check_point = maxScx;
-         Scx_point =snapScx;
-      }
+
       x_scroll = (float)(100 * *accion)/lvl_zoom; // toma el sentido del desplazamiento
       Scx = Scx  + x_scroll;
-
-      if (abs(Scx)>=check_point)
+      check_point = MOON_MAX_X /lvl_zoom;
+            if (abs(Scx)>=check_point)
       {
            printf("Hemos dado la vuelta\n");
-           Scx =snapScx;                        // Restaura punto inicial de desplazamiento
+           Scx = abs(Scx)-check_point; // Restaura punto inicial de desplazamiento
        };
       _xf = _xf + x_scroll*lvl_zoom;
       *accion = 0;
     }
     else x_scroll =0;   // Reajusta valores para dar sensación de escenario continuo
 
+
 }
 
+/*
+*   scroll_auto        : Efectua scroll a izq / dcha de forma automática
+*   WIP -----
+*   23/07/2022
+*/
 void scroll_auto(){
 
 
 }
 
 /*
-*   scroll_check        : Compruebva si es preciso realizar scroll a izq / dcha.
-*   CE:                 Scx : factor de desplazamiento actual
-*                       x_scr:   Posición final en pantalla sin corección
+*   scroll_check        : Comprueba si es preciso realizar scroll a izq / dcha.
+*   WIP -----
+*   23/07/2022
 */
 
-void scroll_check(float *Scx,float x_scr){
-
-    printf("SCROLL_CHECK : Scx = %f\tx_pos = %f\n",*Scx,x_scr);
-    /*
-    if (x_scr < margen_dcho){
-
-            *Scx = *Scx + 10;
-
-    } else if (x_scr > margen_izq) {
-
-            *Scx = *Scx - 10;
-
-    }
-
-    if ( abs((int) *Scx) > WIDTH) {
-
-       printf ("Hemos dado la vuelta\n");
-       *Scx = WIDTH - *Scx ;
-
-    }
-
-    */
+void scroll_check(float *Scx,float x_scr,int escala){
 
 
-    //if (*Scx > WIDTH) *Scx = WIDTH - *Scx;
-    /*
-    fSct = (x_pos/zoom[scale])- Scx;
-    if (fSct<0) fSct = fSct + MOON_MAX_X/zoom[scale];
-    else if (fSct>WIDTH) fSct = fSct - MOON_MAX_X/zoom[scale];
-    // Check if scroll needed
-    if (fSct >= WIDTH -32) shift_dir = 1; // Ajuste del scroll a la escala
-    if (fSct <= 32) shift_dir = -1;
-*/
-    //**** Ojo con esto revisar ****************************************
-    // Reajusta valores para dar sensación de escenario continuo
-    //if (x_pos<=0) x_pos = x_pos + MOON_MAX_X;
-    //else if (x_pos>=MOON_MAX_X) x_pos = x_pos -MOON_MAX_X;
-    //******************************************************************/
 }
 /***********************************************************************
 * fisica : Calcula los vecrtores  aceleración, velocidad y la posición
@@ -1266,6 +1237,7 @@ int game(void)
   actiond[left_pressed] = 0;	  actiond[right_pressed] = 0;
   actiond[up_pressed] = 0;		  actiond[down_pressed] = 0;
   actiond[shift_pressed] = 0;	  actiond[zoom_pressed] = 0;
+  actiond[keyo_pressed] = 0;      actiond[keyp_pressed] = 0;
   scale = LEVEL;                  scale_old = scale;
   lives = 3;                      level = 1;
   player_alive = 1;               player_die_timer = 0;
@@ -1330,9 +1302,8 @@ int game(void)
     curr_time = SDL_GetTicks();              // Calcular
     dtime = curr_time - prev_time;           // el paso
     prev_time = curr_time;                   //  del iempo
-    /****** OJO FISICA COMENTADA *****
-    //fisica(impulso[gas],angle,dtime/1000);   //  acc, vel, desp, consumo de fuel
-    **********************************/
+    fisica(impulso[gas],angle,dtime/1000);   //  acc, vel, desp, consumo de fuel
+    /**********************************/
     x = (int)round(x_pos);
     y = (int)round(y_pos);
     check_dist(&hx,&hy,x,y,moon_a);
@@ -1342,7 +1313,7 @@ int game(void)
     scale = zoom_manual(actiond[zoom_pressed],scale);
     if (scale != scale_old)
     {
-       update_camera(x,y,scale,&Scx,&Scy);
+       update_camera(x,y,scale,&Scx,&Scy,&snapScx,&maxScx);
        scale_old = scale;
     }
     actiond[zoom_pressed]=0;            shift_dir = 0;
@@ -1353,12 +1324,11 @@ int game(void)
     if (actiond[keyp_pressed]){
         x_pos = x_pos + 40;             actiond[keyp_pressed]=0;
     }
-
-    scroll_check(&Scx, x_pos/zoom[scale]);
+    scroll_check(&Scx, x_pos/zoom[scale],scale);
+    if (scale == LEVEL) scroll_manual(&actiond[shift_pressed],scale, zoom[scale],x_pos);
     printf ("x lander = %f (x screen) = %f\n",x_pos, x_pos/zoom[scale]);
-
-    scroll_manual(&actiond[shift_pressed],scale, zoom[scale],x_pos);
-
+    if (x_pos<=0) x_pos = x_pos + MOON_MAX_X;
+    else if (x_pos>=MOON_MAX_X) x_pos = x_pos -MOON_MAX_X;
     x = (int)round(x_pos);
     y = (int)round(y_pos);
    /**** Actualización de la pantalla *********************************/
@@ -1373,7 +1343,7 @@ int game(void)
      draw_lander(Plander,x,y,angle,gas,2*WIDTH/ASPECT,scale,mkcolor(255,255,255));   // Dibuja el LEM
 
      /**** gestión Alunizaje *********************************/
-     j = check_ground(h,hx,x_vel, y_vel,1);
+    j = check_ground(h,hx,x_vel, y_vel,1);
      if (j)
      {
         if (j == -1) done = 1;
@@ -1382,6 +1352,7 @@ int game(void)
             add_score(x,1,base);
              }
      }
+
      /******************/
      SDL_Flip(screen);
      SDL_Delay(1);

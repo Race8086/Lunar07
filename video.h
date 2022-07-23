@@ -80,7 +80,7 @@ void draw_text(char * str, int x, int y, int s, color_type c);
 void draw_centered_text(char * str, int y, int s, color_type c);
 
 /*** Gestión de vetana de visualización **/
-void update_camera(int xl, int yl, int scale, float *pscx,float *pscy,float *psnap);
+void update_camera(int xl, int yl, int scale, float *pscx,float *pscy,float *psnap,float *pmax);
 int zoom_manual(int hh,int pscale);
 int zoom_auto(int hl);
 

@@ -1012,18 +1012,19 @@ void draw_fuel ( int nivel, int x, int y)
 ***********************************************************************************************/
 
 
-void update_camera(int xl, int yl, int scale, float *pscx,float *pscy,float *psnap)
+void update_camera(int xl, int yl, int scale, float *pscx,float *pscy,float *psnap,float *pmax)
 {
 
-// Convertir coordenadas reales a la escala vigente
-if (scale!=LEVEL)
-{
+
+if (scale!=LEVEL)               // Convertir coordenadas reales a la escala vigente
+{                               // y centrar imagen
 xl = xl/zoom[scale];
 yl = yl/zoom[scale];
-// Calcular el nuevo origen para la ventana de visualización
+                                // Calcular el nuevo origen para la ventana de visualización
 *pscx = xl -(WIDTH/2);
 *pscy = yl -(HEIGHT/2);
-*psnap = *pscx;             // Guardamos el Scx de partida
+*psnap = *pscx;                 // Guardamos el Scx de partida
+*pmax = MOON_MAX_X/zoom[scale];// y el valor máximo de Scx
 }
 else  // No hace falta centrar imagen
 {

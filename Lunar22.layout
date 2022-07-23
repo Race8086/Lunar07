@@ -2,6 +2,36 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
+	<File name="lunar.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="6254" topLine="126" />
+		</Cursor>
+		<Folding>
+			<Collapse line="263" />
+			<Collapse line="291" />
+			<Collapse line="320" />
+			<Collapse line="341" />
+			<Collapse line="475" />
+			<Collapse line="487" />
+			<Collapse line="521" />
+			<Collapse line="564" />
+			<Collapse line="589" />
+			<Collapse line="598" />
+			<Collapse line="611" />
+			<Collapse line="620" />
+			<Collapse line="633" />
+			<Collapse line="656" />
+			<Collapse line="673" />
+			<Collapse line="721" />
+			<Collapse line="742" />
+			<Collapse line="877" />
+			<Collapse line="887" />
+			<Collapse line="899" />
+			<Collapse line="913" />
+			<Collapse line="960" />
+			<Collapse line="968" />
+		</Folding>
+	</File>
 	<File name="lunar.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1664" topLine="0" />
@@ -12,64 +42,24 @@
 			<Cursor1 position="9664" topLine="489" />
 		</Cursor>
 	</File>
-	<File name="lunar.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="30361" topLine="565" />
-		</Cursor>
-		<Folding>
-			<Collapse line="256" />
-			<Collapse line="284" />
-			<Collapse line="313" />
-			<Collapse line="334" />
-			<Collapse line="468" />
-			<Collapse line="480" />
-			<Collapse line="514" />
-			<Collapse line="557" />
-			<Collapse line="582" />
-			<Collapse line="591" />
-			<Collapse line="604" />
-			<Collapse line="613" />
-			<Collapse line="626" />
-			<Collapse line="649" />
-			<Collapse line="666" />
-			<Collapse line="680" />
-			<Collapse line="691" />
-			<Collapse line="714" />
-			<Collapse line="735" />
-			<Collapse line="870" />
-			<Collapse line="880" />
-			<Collapse line="892" />
-			<Collapse line="906" />
-			<Collapse line="953" />
-			<Collapse line="961" />
-			<Collapse line="977" />
-			<Collapse line="994" />
-			<Collapse line="1229" />
-			<Collapse line="1399" />
-			<Collapse line="1507" />
-			<Collapse line="1663" />
-			<Collapse line="1833" />
-			<Collapse line="1980" />
-		</Folding>
-	</File>
-	<File name="DT_drawtext.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="246" topLine="3" />
-		</Cursor>
-	</File>
 	<File name="video.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="24005" topLine="1012" />
+			<Cursor1 position="20203" topLine="905" />
 		</Cursor>
 	</File>
 	<File name="video.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2083" topLine="63" />
+			<Cursor1 position="1949" topLine="63" />
 		</Cursor>
 	</File>
 	<File name="gp2x_buttons.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="0" topLine="10" />
+		</Cursor>
+	</File>
+	<File name="DT_drawtext.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="246" topLine="3" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
