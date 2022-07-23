@@ -130,6 +130,15 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 - TODO
      La variable dx se desborda en un momento dado, depurar
      Comprobar el desplazamiento del escenario en escala PC.
+
+22/7/2022
+
+- Reorganizado en funciones el código para hacer zoom
+- Reorganizado el código en funciones para hacer scroll
+  (está pendiente de implementar las zonas frontera)
+- Incorporadas teclas o-p para desplazar en eje x posición
+  absoluta del Lem
+ - Abierto branch : Autoscroll para siguientes modificaciones en scroll
 */
 
 #include "lunar.h"
@@ -265,7 +274,11 @@ float x_scroll,             // scroll en eje X
       y_scroll;             // scroll en eje Y
 int   scroll=0;             // Flag scroll
 float fSct;                 // tbd
-
+float uds_scroll=0;          // uds de desplazamiento el viewport
+int   margen_izq;           // Limite izquierdo para hacer scroll
+int   margen_dcho;          // Limite derecho para hacer scroll
+float maxScx;               // Máximo desplazamiento en horizontal de scroll
+float snapScx;              // Punto de partida del desplazamiento
 /**************** Datos del terreno, bases , LEM , espacio ********************/
 int res_x = 50;      // Resolucion eje X
 
@@ -1015,21 +1028,27 @@ else
 
 }
 
-void scroll_manual(int *accion, int lvl_zoom,float _xf){
+void scroll_manual(int *accion, int escala, int lvl_zoom,float _xf){
 
+float check_point;            // Punto donde se cierra el terreno
+int   Scx_point;
     if (*accion)
     {
-      x_scroll = (float)(50 * *accion)/lvl_zoom; // toma el sentido del desplazamiento
+      if (escala == LEVEL) {        // partimos de Scx=0
+         check_point = MOON_MAX_X/lvl_zoom;
+         Scx_point =0;
+      }
+      else{
+         check_point = maxScx;
+         Scx_point =snapScx;
+      }
+      x_scroll = (float)(100 * *accion)/lvl_zoom; // toma el sentido del desplazamiento
       Scx = Scx  + x_scroll;
-      /*
-        No podemos incrementar indefinidamente Scx en un scroll contínuo cuando hemos dado la vuelta a la superfice
-        hay que inicializar Scx al desplazamiento inicial cuando se genero el viewport.
-        La siguiente secuencia solo sirve en la escala máxima, donde da la casualidad que Scx = 0;
-      */
-      if (Scx>=MOON_MAX_X/lvl_zoom)
+
+      if (abs(Scx)>=check_point)
       {
            printf("Hemos dado la vuelta\n");
-           Scx =0;
+           Scx =snapScx;                        // Restaura punto inicial de desplazamiento
        };
       _xf = _xf + x_scroll*lvl_zoom;
       *accion = 0;
@@ -1043,11 +1062,50 @@ void scroll_auto(){
 
 }
 
-void scroll_check(float *Scx){
+/*
+*   scroll_check        : Compruebva si es preciso realizar scroll a izq / dcha.
+*   CE:                 Scx : factor de desplazamiento actual
+*                       x_scr:   Posición final en pantalla sin corección
+*/
 
-printf("Scx = %f\n",*Scx);
-//if (*Scx > WIDTH) *Scx = WIDTH - *Scx;
+void scroll_check(float *Scx,float x_scr){
 
+    printf("SCROLL_CHECK : Scx = %f\tx_pos = %f\n",*Scx,x_scr);
+    /*
+    if (x_scr < margen_dcho){
+
+            *Scx = *Scx + 10;
+
+    } else if (x_scr > margen_izq) {
+
+            *Scx = *Scx - 10;
+
+    }
+
+    if ( abs((int) *Scx) > WIDTH) {
+
+       printf ("Hemos dado la vuelta\n");
+       *Scx = WIDTH - *Scx ;
+
+    }
+
+    */
+
+
+    //if (*Scx > WIDTH) *Scx = WIDTH - *Scx;
+    /*
+    fSct = (x_pos/zoom[scale])- Scx;
+    if (fSct<0) fSct = fSct + MOON_MAX_X/zoom[scale];
+    else if (fSct>WIDTH) fSct = fSct - MOON_MAX_X/zoom[scale];
+    // Check if scroll needed
+    if (fSct >= WIDTH -32) shift_dir = 1; // Ajuste del scroll a la escala
+    if (fSct <= 32) shift_dir = -1;
+*/
+    //**** Ojo con esto revisar ****************************************
+    // Reajusta valores para dar sensación de escenario continuo
+    //if (x_pos<=0) x_pos = x_pos + MOON_MAX_X;
+    //else if (x_pos>=MOON_MAX_X) x_pos = x_pos -MOON_MAX_X;
+    //******************************************************************/
 }
 /***********************************************************************
 * fisica : Calcula los vecrtores  aceleración, velocidad y la posición
@@ -1204,37 +1262,29 @@ int game(void)
   float dtime;       // diferencial de tiempo entre cada iteración
   int j;
   /***************** Inicialización de variables ***************************/
-  done = 0;
-  quit = 0;
+  done = 0;                       quit = 0;
   actiond[left_pressed] = 0;	  actiond[right_pressed] = 0;
   actiond[up_pressed] = 0;		  actiond[down_pressed] = 0;
   actiond[shift_pressed] = 0;	  actiond[zoom_pressed] = 0;
   scale = LEVEL;                  scale_old = scale;
-  lives = 3;
-  level = 1;
-  player_alive = 1;
-  player_die_timer = 0;
-  angle = 90;
-  Scx =0;     Scy = 0;
-  fSct =0;
-  x_scroll=0; y_scroll=0;
+  lives = 3;                      level = 1;
+  player_alive = 1;               player_die_timer = 0;
+  angle = 90;                     Scx =0;     Scy = 0;
+  fSct =0;                        x_scroll=0; y_scroll=0;
+  x=3200;                         y=3200;
+  x_pos = x;  y_pos = y;          x_posant = x;  y_posant = y;
+  gas =0;                         fuel=10800.0;
   //*********************************************************
-  gas =0;
-  fuel=10800.0;
+  margen_izq = 40;                margen_dcho = WIDTH - margen_izq;
+  maxScx = Scx + WIDTH;           // Partimos de nivel de zoom mínimo (LEVEL)
+  snapScx = maxScx;               // Se debe inicializar al cambiar de escala
   if (cfg_var[FIS])  m0 = fuel + mu;
   else m0 = 1;
 
   prev_time = SDL_GetTicks(); // toma referencia de tiempos
   curr_time = prev_time;
-  x=430;
-  y=2600;
-  x_pos = x;
-  y_pos = y;
-  x_posant = x;
-  y_posant = y;
 
-
-   /********************** Bucle principal ************************************/
+  /********************** Bucle principal ************************************/
   do
     {
      maneja_eventos(actiond,&done,&quit,&gas);            /* Maneja Eventos: */
@@ -1285,8 +1335,6 @@ int game(void)
     **********************************/
     x = (int)round(x_pos);
     y = (int)round(y_pos);
-    // Comprueba distancia eje Y
-    //h = y - (moon_a[x/50].y);
     check_dist(&hx,&hy,x,y,moon_a);
     h = hy;
     /****************** Ajuste de cámara en función de la distancia al suelo **/
@@ -1297,37 +1345,20 @@ int game(void)
        update_camera(x,y,scale,&Scx,&Scy);
        scale_old = scale;
     }
-    actiond[zoom_pressed]=0;
-    shift_dir = 0;
+    actiond[zoom_pressed]=0;            shift_dir = 0;
 // desplazamiento forzado del lander en horizontal
     if (actiond[keyo_pressed]){
-
-        x_pos = x_pos -40;
-        actiond[keyo_pressed]=0;
+        x_pos = x_pos -40;              actiond[keyo_pressed]=0;
     }
     if (actiond[keyp_pressed]){
-
-        x_pos = x_pos + 40;
-        actiond[keyp_pressed]=0;
+        x_pos = x_pos + 40;             actiond[keyp_pressed]=0;
     }
-    scroll_check(&Scx);
-    /*
-    fSct = (x_pos/zoom[scale])- Scx;
-    if (fSct<0) fSct = fSct + MOON_MAX_X/zoom[scale];
-    else if (fSct>WIDTH) fSct = fSct - MOON_MAX_X/zoom[scale];
 
-    // Check if scroll needed
-    if (fSct >= WIDTH -32) shift_dir = 1; // Ajuste del scroll a la escala
-    if (fSct <= 32) shift_dir = -1;
-*/
+    scroll_check(&Scx, x_pos/zoom[scale]);
     printf ("x lander = %f (x screen) = %f\n",x_pos, x_pos/zoom[scale]);
-    scroll_manual(&actiond[shift_pressed], zoom[scale],x_pos);
 
-    /**** Ojo con esto revisar ****************************************
-    // Reajusta valores para dar sensación de escenario continuo
-    if (x_pos<=0) x_pos = x_pos + MOON_MAX_X;
-    else if (x_pos>=MOON_MAX_X) x_pos = x_pos -MOON_MAX_X;
-    ******************************************************************/
+    scroll_manual(&actiond[shift_pressed],scale, zoom[scale],x_pos);
+
     x = (int)round(x_pos);
     y = (int)round(y_pos);
    /**** Actualización de la pantalla *********************************/

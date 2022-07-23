@@ -1012,7 +1012,7 @@ void draw_fuel ( int nivel, int x, int y)
 ***********************************************************************************************/
 
 
-void update_camera(int xl, int yl, int scale, float *pscx,float *pscy)
+void update_camera(int xl, int yl, int scale, float *pscx,float *pscy,float *psnap)
 {
 
 // Convertir coordenadas reales a la escala vigente
@@ -1023,6 +1023,7 @@ yl = yl/zoom[scale];
 // Calcular el nuevo origen para la ventana de visualización
 *pscx = xl -(WIDTH/2);
 *pscy = yl -(HEIGHT/2);
+*psnap = *pscx;             // Guardamos el Scx de partida
 }
 else  // No hace falta centrar imagen
 {
