@@ -87,6 +87,7 @@ int zoom_auto(int hl);
 /*** Funciones para el terreno, las bases, el LEM y los indicadores ***/
 
 void draw_terrain(terrain t_a[],int scr,int level);
+void draw_terrain2(terrain t_a[],int escala);
 void draw_bases(landing_zone bs[],int scr,int level);
 void draw_stars(terrain s[],int level);
 void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, int r,int level,color_type cf);

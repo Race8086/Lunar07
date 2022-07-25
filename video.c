@@ -1,5 +1,10 @@
 /*
 Video.c Modulo con las funciones de pintado en pantalla
+
+28/07/2022
+
+Inclusión de funciones para pannig y zooming
+
 */
 
 #include "video.h"
@@ -7,6 +12,7 @@ Video.c Modulo con las funciones de pintado en pantalla
 // Variables Globales
 extern float Scx,Scy;
 extern SDL_Surface *screen;
+extern void WorldToScreen(float wx, float wy, int *sx, int *sy);
 
 Uint8 *pixels;
 /*
@@ -456,6 +462,7 @@ color_type mkcolor(int r, int g, int b)
   return c;
 }
 
+
 /*******************************************************************************************/
 // Funciones de pintado de líneas
 /*******************************************************************************************/
@@ -759,7 +766,7 @@ void draw_thick_line(int x1, int y1, color_type c1,
 * draw_terrain
 *			t_a[]: array con las coordenadas del tereno
 *			scr:	uds en el eje x para desplazar el terreno
-*			level: nivel de zoom 0-4
+*			escala: nivel de zoom a aplicar
 *
 *
 ***********************************************************************************************************/
@@ -791,6 +798,40 @@ void draw_terrain(terrain t_a[],int scr,int level)
     };
 
 };
+
+void draw_terrain2(terrain t_a[],int escala)
+{
+
+    int i,i_ini,i_last,i_end=0; // Loop counter
+    int x0,x1;
+    int y0,y1;
+    float wx,wy;
+    i_ini = 0;
+    i_last = 128;
+
+    i_end = t_a[i_last].x/escala;  // punto final del terreno
+
+    for (i=i_ini;i!=i_last;i = (i+1) % 129)
+    {
+
+        wx= t_a[i].x;
+        wy= t_a[i].y;
+        WorldToScreen(wx,wy,&x0,&y0);
+        wx= t_a[i+1].x;
+        wy= t_a[i+1].y;
+        WorldToScreen(wx,wy,&x1,&y1);
+        y0=HEIGHT - y0;
+        y1=HEIGHT - y1;
+        if (x0<0) x0 = x0 + i_end;
+        else if (x0>WIDTH) x0 = x0 - i_end;
+        if (x1 <0) x1 = x1 + i_end;
+        else if (x1 >WIDTH) x1 = x1 - i_end;
+        if (x0<x1)
+        draw_line2(x0,y0,mkcolor(255,255,255),x1,y1,mkcolor(255,255,255),0);
+    };
+
+};
+
 
 
 /***********************************************************************

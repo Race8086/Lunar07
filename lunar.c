@@ -146,7 +146,14 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
    replantearlo desde cero.
  - Se ha detectado que el desbordamiento a en la distancia al terreno se desborda en la zona de
    las bases de alunizaje.
+
+25/07/2022
+
+  Creación de un cjo de funciones genéricas para manejo de zoom y pann
 */
+
+
+
 
 #include "lunar.h"
 #include "video.h"
@@ -249,6 +256,9 @@ int angle;                  // Angulo de inclinación del LEM
 float t;                    // tiempo universal
 extern int zoom[5];         // Niveles de Zoom ( declarado en video.c)
 float m0;                   // Masa inicial del LEM
+/******************* zooming and panning *****************************************/
+int s_x,s_y;                // Posición pantalla
+int o_x,o_y;                // panning
 /***************** Variable con modelo ecuaciones diferenciales ******************/
 #define CNV 0.0174532928;   // factor conversión grados a radianes pi/180
 float x_thrust,y_thrust;    // Componentes x,y del vector impulso
@@ -275,6 +285,9 @@ float impulso[] =           // Impulso de los motores ( 10 niveles ) en Kg/s
 };
 
 /*************** Variables gestión representación en pantalla *****************/
+float ox;                   // offset en el eje x para hacer panning
+float oy;                   // offset en el eje y para hacer panning
+
 float Scx,                  // origen del viewport para centrar la cámara en zonas de
       Scy;                  // mayor superficie que la pantalla
 float x_scroll,             // scroll en eje X
@@ -471,6 +484,140 @@ terrain  moon_a [129] = {          // Terreno, cada punto X,Y absolutas
 {	6400	,	1600	}
 };
 
+
+terrain  moon_b [129] = {          // Terreno, cada punto X,Y absolutas
+{	0		,	1600	},
+{	50  	,	1800	},
+{	100		,	1700	},
+{	150		,	1710	},         // Máxima cota del terreno
+{	200		,	1720	},
+{	250		,	1700	},
+{	300		,	1500	},
+{	350		,	1550	},
+{	400		,	1600	},
+{	450		,	1630    },
+{	500		,	1650	},
+{	550		,	1630	},
+{	600		,	1615	},
+{	650		,	1670	},
+{	700		,	1690	},
+{	750		,	1700	},
+{	800		,	1720	},    // base 1
+{	850		,	1780	},
+{	900		,	1740	},
+{	950		,	1700	},
+{	1000	,	1695	},
+{	1050	,	1690	},
+{	1100	,	1670	},
+{	1150	,	1640	},
+{	1200	,	1600	},
+{	1250	,	1610	},
+{	1300	,	1615	},
+{	1350	,	1620	},
+{	1400	,	1690	},
+{	1450	,	1690	},
+{	1500	,	1680	},
+{	1550	,	1680	},
+{	1600	,	1640	},
+{	1650	,	1630	},
+{	1700	,	1620	},
+{	1750	,	1615	},
+{	1800	,	1600	},
+{	1850	,	1640	},
+{	1900	,	1640	},
+{	1950	,	1640	},
+{	2000	,	1680	},
+{	2050	,	1680	},
+{	2100	,	1690	},
+{	2150	,	1680	},
+{	2200	,	1640	},
+{	2250	,	1600	},
+{	2300	,	1650	}, // base 2
+{	2350	,	1700	},
+{	2400	,	1725	},
+{	2450	,	1750	},
+{	2500	,	1730	},
+{	2550	,	1700	},
+{	2600	,	1650	},
+{	2650	,	1650	},
+{	2700	,	1640	},
+{	2750	,	1600	},
+{	2800	,	1600	},
+{	2850	,	1600	},
+{	2900	,	1600	},
+{	2950	,	1650	},
+{	3000	,	1650	},
+{	3050	,	1650	},
+{	3100	,	1700	},
+{	3150	,	1700	},
+{	3200	,	1650	},
+{	3250	,	1680	},
+{	3300	,	1650	},
+{	3350	,	1620	},
+{	3400	,	1620	},
+{	3450	,	1650	},
+{	3500	,	1000	},
+{	3550	,	900		},
+{	3600	,	800		},
+{	3650	,	700		},
+{	3700	,	750		},
+{	3750	,	600		},
+{	3800	,	600		}, // base 3
+{	3850	,	600		},
+{	3900	,	700		},
+{	3950	,	740		},
+{	4000	,	770		},
+{	4050	,	775		},
+{	4100	,	800		},
+{	4150	,	850		},
+{	4200	,	850		}, // base 4
+{	4250	,	850		},
+{	4300	,	900		},
+{	4350	,	950		},
+{	4400	,	960		},
+{	4450	,	1000	},
+{	4500	,	1100	},
+{	4550	,	1200	},
+{	4600	,	1500	},
+{	4650	,	1700	},
+{	4700	,	1800	},
+{	4750	,	1825	},
+{	4800	,	1900	},
+{	4850	,	1950	},
+{	4900	,	1900	},
+{	4950	,	2100	},
+{	5000	,	2100	}, // base 5
+{	5050	,	2100	},
+{	5100	,	2000	},
+{	5150	,	1900	},
+{	5200	,	1800	},
+{	5250	,	1700	},
+{	5300	,	1500	},
+{	5350	,	1300	},
+{	5400	,	1200	},
+{	5450	,	900		},
+{	5500	,	700		},
+{	5550	,	500		},
+{	5600	,	430		},
+{	5650	,	400		},
+{	5700	,	400		}, // base 6
+{	5750	,	400		},
+{	5800	,	450		},
+{	5850	,	500		},
+{	5900	,	600		},
+{	5950	,	650		},
+{	6000	,	700		},
+{	6050	,	800		},
+{	6100	,	900		},
+{	6150	,	1000	},
+{	6200	,	1200	},
+{	6250	,	1300	},
+{	6300	,	1400	},
+{	6350	,	1500	},
+{	6400	,	1600	}
+};
+
+
 // Game Bases
 
 landing_zone base[6] ={            // Bases, X,Y,Puntos,
@@ -498,6 +645,35 @@ terrain star[11] =                  // Stars, cada punto X,Y absolutas
 {	6000	,	2600	},
 {	6250	,	3100	},
 };
+
+
+
+/*******************************************************************************************/
+// Funciones para panning y zooming
+/*******************************************************************************************/
+
+/*
+*   DESC:   Convierte coordenadas de pantalla en las coordenadas del mundo real, tiene en cuenta
+            si esiste una conversión de escala (zoom )
+    CE:     sx Coordenada X a convertir
+            sy Coordenada Y a convertir
+    CEI:    Es necesario que sean visibles las variables de offset actuales ox , oy
+    CS:     wx Coordenada X convertida
+            wy Coordenda Y convertida
+*/
+extern void ScreenToWorld(int sx, int sy, float *wx, float *wy){
+
+        *wx = (float) (sx - o_x);
+        *wy = (float) (sy - o_y);
+}
+
+
+extern void WorldToScreen(float wx, float wy, int *sx, int *sy){
+
+        *sx = (int) (wx + o_x);
+        *sy = (int) (wy + o_y);
+}
+
 
 
 void finish(void)
@@ -1228,7 +1404,7 @@ int game(void)
   int scale;        // Nivel de zoom actual
   int scale_old;    // Nivel de zoom anterior
   int actiond[8];   // Lista de posibles acciones en el juego
-  int shift_dir;    // Sentido del scroll
+
  // float xf,yf;      // Variables auxiliareas para gestión pantalla
   float dtime;       // diferencial de tiempo entre cada iteración
   int j;
@@ -1246,6 +1422,8 @@ int game(void)
   x=3200;                         y=3200;
   x_pos = x;  y_pos = y;          x_posant = x;  y_posant = y;
   gas =0;                         fuel=10800.0;
+
+  ox = 0;                         oy = 0;
   //*********************************************************
   margen_izq = 40;                margen_dcho = WIDTH - margen_izq;
   maxScx = Scx + WIDTH;           // Partimos de nivel de zoom mínimo (LEVEL)
@@ -1259,7 +1437,9 @@ int game(void)
   /********************** Bucle principal ************************************/
   do
     {
+
      maneja_eventos(actiond,&done,&quit,&gas);            /* Maneja Eventos: */
+
      /************** Procesa acciones **************/
     if (actiond[right_pressed])   // Rotate ship
 	{
@@ -1316,7 +1496,7 @@ int game(void)
        update_camera(x,y,scale,&Scx,&Scy,&snapScx,&maxScx);
        scale_old = scale;
     }
-    actiond[zoom_pressed]=0;            shift_dir = 0;
+    actiond[zoom_pressed]=0;
 // desplazamiento forzado del lander en horizontal
     if (actiond[keyo_pressed]){
         x_pos = x_pos -40;              actiond[keyo_pressed]=0;
@@ -1342,7 +1522,7 @@ int game(void)
      draw_fuel (gas,120,5);
      draw_lander(Plander,x,y,angle,gas,2*WIDTH/ASPECT,scale,mkcolor(255,255,255));   // Dibuja el LEM
 
-     /**** gestión Alunizaje *********************************/
+     //**** gestión Alunizaje *********************************
     j = check_ground(h,hx,x_vel, y_vel,1);
      if (j)
      {
@@ -1353,9 +1533,11 @@ int game(void)
              }
      }
 
+
      /******************/
      SDL_Flip(screen);
      SDL_Delay(1);
+
 
 
      }
@@ -1366,6 +1548,115 @@ int game(void)
   return(done);
 }
 /* Title screen: ****************************************************/
+
+
+
+int game2(void)
+{
+  int done, quit;
+
+  Uint64 curr_time;
+  Uint64 prev_time;
+  int gas;          // nivel de impulso que se da al LEM
+
+  int scale=1;        // Nivel de zoom actual
+
+  int actiond[8];   // Lista de posibles acciones en el juego
+
+  int x_screen;
+  int y_screen;
+
+  int flag;
+  /***************** Inicialización de variables ***************************/
+  done = 0;                       quit = 0;
+  actiond[left_pressed] = 0;	  actiond[right_pressed] = 0;
+  actiond[up_pressed] = 0;		  actiond[down_pressed] = 0;
+  actiond[shift_pressed] = 0;	  actiond[zoom_pressed] = 0;
+  actiond[keyo_pressed] = 0;      actiond[keyp_pressed] = 0;
+  scale = LEVEL;
+  lives = 3;                      level = 1;
+  player_alive = 1;               player_die_timer = 0;
+  x=320;                         y=240;
+  x_pos = 320.0;  y_pos = 1600.0;          x_posant = x;  y_posant = y;
+  gas =0;                         fuel=10800.0;
+  flag = 0;
+  o_x = 0;                         o_y = -1450;
+  //*********************************************************
+//  margen_izq = 40;                margen_dcho = WIDTH - margen_izq;
+ // maxScx = Scx + WIDTH;           // Partimos de nivel de zoom mínimo (LEVEL)
+ // snapScx = maxScx;               // Se debe inicializar al cambiar de escala
+//  if (cfg_var[FIS])  m0 = fuel + mu;
+//  else m0 = 1;
+
+  prev_time = SDL_GetTicks(); // toma referencia de tiempos
+  curr_time = prev_time;
+
+  SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // Limpia Pantalla
+  SDL_Flip(screen);
+  /********************** Bucle principal ************************************/
+  flag = 1;
+  do
+    {
+
+     maneja_eventos(actiond,&done,&quit,&gas);            /* Maneja Eventos: */
+
+     /************** Procesa acciones **************/
+    if (actiond[right_pressed]){
+            x_pos =  x_pos + 10;             actiond[right_pressed]=0;
+            flag = 1;
+        }
+    if (actiond[left_pressed]){
+            x_pos = x_pos -10;              actiond[left_pressed]=0;
+            flag = 1;
+        }
+    if (actiond[up_pressed]){
+            y_pos = y_pos + 10;              actiond[up_pressed]=0;
+            flag = 1;
+	    }
+    if (actiond[down_pressed]){
+            y_pos = y_pos - 10;              actiond[down_pressed]=0;
+            flag = 1;
+        }
+    if (actiond[keyo_pressed]){
+            o_x = o_x -10;          actiond[keyo_pressed]=0;
+            flag = 1;
+        }
+    if (actiond[keyp_pressed]){
+            o_x = o_x + 10;          actiond[keyp_pressed]=0;
+            flag = 1;
+        }
+    /**********************************/
+
+   /**** Actualización de la pantalla *********************************/
+
+    if (flag) {
+         SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // Limpia Pantalla
+
+
+         WorldToScreen(x_pos,y_pos,&x_screen,&y_screen);
+         y_screen = HEIGHT - y_screen;          // Ajuste para las funciones SDL
+         draw_line2(x_screen,y_screen,mkcolor(255,255,255),x_screen+10,y_screen,mkcolor(255,255,255),0);
+
+        draw_terrain2(moon_b,1);
+
+        SDL_Flip(screen);
+        SDL_Delay(1);
+
+
+        printf ("x_pos: %f\t y_pos: %f\n",x_pos,y_pos);
+        printf ("x_scr: %d\t y_scr: %d\n",x_screen,y_screen);
+        printf ("o_x: %d\t s_y: %d\n",o_x,o_y);
+        flag = 0;
+     }
+
+       }
+  while (!done);
+//  j = draw_result(gas,scale,done);
+  return(done);
+}
+/* Title screen: ****************************************************/
+
+
 
 int title(void)
 {
@@ -1986,7 +2277,7 @@ int main(int argc, char * argv[])
           }
           case 2: // Jugar
           {
-            done = game();
+            done = game2();
             break;
           }
           case 3: // Menú de configuración
