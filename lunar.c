@@ -974,6 +974,8 @@ while (SDL_PollEvent(&event) > 0) /*1*/
     		else if (key == SDLK_d)   { action[shift_pressed] = 1;  }  /* shift right */
     		else if (key == SDLK_o)   { action[keyo_pressed] = 1; }  /* tecla o */
     		else if (key == SDLK_p)   { action[keyp_pressed] = 1;  }  /* tecla p */
+            else if (key == SDLK_q)   { action[keyq_pressed] = 1;  }  /*  tecla q */
+    		else if (key == SDLK_a)   { action[keya_pressed] = 1;   }  /* tecla a */
     	}
     	else if (event.type == SDL_KEYUP)  //--------------- TECLA LIBERADA
     	{
@@ -987,6 +989,8 @@ while (SDL_PollEvent(&event) > 0) /*1*/
         	else if (key == SDLK_d)    { action[shift_pressed] = 0;	}
         	else if (key == SDLK_o)   { action[keyo_pressed] = 0; }  /* tecla o */
     		else if (key == SDLK_p)   { action[keyp_pressed] = 0;  }  /* tecla p */
+    		else if (key == SDLK_q)   { action[keyq_pressed] = 0;  }  /*  tecla q */
+    		else if (key == SDLK_a)   { action[keya_pressed] = 0;   }  /* tecla a */
         	if (key == SDLK_LALT)      { action[shift_pressed] = 0; }
     	}
     }
@@ -1555,24 +1559,24 @@ int game2(void)
 {
   int done, quit;
 
-  Uint64 curr_time;
-  Uint64 prev_time;
+ // Uint64 curr_time;
+ // Uint64 prev_time;
   int gas;          // nivel de impulso que se da al LEM
-
   int scale=1;        // Nivel de zoom actual
-
-  int actiond[8];   // Lista de posibles acciones en el juego
-
+  int actiond[10];   // Lista de posibles acciones en el juego
   int x_screen;
   int y_screen;
-
   int flag;
+  int xl_left;
+  int xl_right;
+
   /***************** Inicialización de variables ***************************/
   done = 0;                       quit = 0;
   actiond[left_pressed] = 0;	  actiond[right_pressed] = 0;
   actiond[up_pressed] = 0;		  actiond[down_pressed] = 0;
   actiond[shift_pressed] = 0;	  actiond[zoom_pressed] = 0;
   actiond[keyo_pressed] = 0;      actiond[keyp_pressed] = 0;
+  actiond[keyq_pressed] = 0;      actiond[keya_pressed] = 0;
   scale = LEVEL;
   lives = 3;                      level = 1;
   player_alive = 1;               player_die_timer = 0;
@@ -1588,11 +1592,14 @@ int game2(void)
 //  if (cfg_var[FIS])  m0 = fuel + mu;
 //  else m0 = 1;
 
-  prev_time = SDL_GetTicks(); // toma referencia de tiempos
-  curr_time = prev_time;
-
+  //prev_time = SDL_GetTicks(); // toma referencia de tiempos
+  //curr_time = prev_time;
   SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // Limpia Pantalla
   SDL_Flip(screen);
+
+  xl_left = 40;
+  xl_right = WIDTH - 40;
+
   /********************** Bucle principal ************************************/
   flag = 1;
   do
@@ -1606,7 +1613,7 @@ int game2(void)
             flag = 1;
         }
     if (actiond[left_pressed]){
-            x_pos = x_pos -10;              actiond[left_pressed]=0;
+            x_pos = x_pos -10;               actiond[left_pressed]=0;
             flag = 1;
         }
     if (actiond[up_pressed]){
@@ -1618,70 +1625,72 @@ int game2(void)
             flag = 1;
         }
     if (actiond[keyo_pressed]){
-            o_x = o_x -10;          actiond[keyo_pressed]=0;
+            o_x = o_x -10;                  actiond[keyo_pressed]=0;
             flag = 1;
         }
     if (actiond[keyp_pressed]){
-            o_x = o_x + 10;          actiond[keyp_pressed]=0;
+            o_x = o_x + 10;                 actiond[keyp_pressed]=0;
             flag = 1;
         }
-    /**********************************/
-
-   /**** Actualización de la pantalla *********************************/
+        if (actiond[keyq_pressed]){
+            o_y = o_y -10;                  actiond[keyq_pressed]=0;
+            flag = 1;
+        }
+    if (actiond[keya_pressed]){
+            o_y = o_y + 10;                 actiond[keya_pressed]=0;
+            flag = 1;
+        }
+      /**** Actualización de la pantalla *********************************/
 
     if (flag) {
          SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // Limpia Pantalla
-
-
+/****** Panning automático al llegar a unos límites *************************************/
+//      Cuando queremos, que cuando se alcancen los límites de pantalla con el objeto
+//       móvil, se haga scroll del terreno y el objeto permanezca en la zona segura
+//       1.- Calculamos la posición del objeto movil en pantalla
+//       2.- Comprobamos si está en lo límites
+//           si está, actualizamos el offset según el limite
+//       3.- Recalculamos la nueva posición del objeto móvil con el nuevo offset
+//           generado.
          WorldToScreen(x_pos,y_pos,&x_screen,&y_screen);
+         if (x_screen <= xl_left) o_x = o_x + 10;
+         if (x_screen >= xl_right) o_x = o_x - 10;
+         WorldToScreen(x_pos,y_pos,&x_screen,&y_screen);
+/****************************************************************************************/
          y_screen = HEIGHT - y_screen;          // Ajuste para las funciones SDL
          draw_line2(x_screen,y_screen,mkcolor(255,255,255),x_screen+10,y_screen,mkcolor(255,255,255),0);
-
-        draw_terrain2(moon_b,1);
-
-        SDL_Flip(screen);
-        SDL_Delay(1);
-
-
-        printf ("x_pos: %f\t y_pos: %f\n",x_pos,y_pos);
-        printf ("x_scr: %d\t y_scr: %d\n",x_screen,y_screen);
-        printf ("o_x: %d\t s_y: %d\n",o_x,o_y);
-        flag = 0;
+         draw_terrain2(moon_b,scale);
+         SDL_Flip(screen);
+         SDL_Delay(1);
+         printf ("X Móvil : %d\t Y Móvil : %d\n",(int) x_pos, (int) y_pos);
+         printf ("x pant. : %d\t y pant. : %d\n",x_screen,y_screen);
+         printf ("offset x: %d\t offest y: %d\n",o_x,o_y);
+         flag = 0;
      }
 
        }
   while (!done);
-//  j = draw_result(gas,scale,done);
   return(done);
 }
-/* Title screen: ****************************************************/
-
-
 
 int title(void)
 {
   int done,  quit;
-  //float rms;
+
   int i;
-  //int snapped;
- //  int angle;
+
  int size= WIDTH/ASPECT; //It only work properly on windows with 4:3 factor
    int counter;
-   //int x, y, xm;
-  // int ym;
    int  z1, z2, z3;
   SDL_Event event;
   SDLKey key;
   char * titlestr = "LUNAR 2007";
   char str[20];
 
-  //snapped = 0;
   counter = 0;
- // angle = 90;
-  //size = 40;
   done = 0;
   quit = 0;
-  //rms = 2.0;
+
   do
   {
     counter++;
@@ -1723,10 +1732,7 @@ int title(void)
   if (if_frame)
     {
       SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-
-
       z1 = (i + counter) % 255;   z2 = ((i + counter + 128) * 2) % 255;    z3 = ((i + counter) * 5) % 255;
-
       draw_centered_text(titlestr, size*100, 9*size,mkcolor(255, 255,255));
       draw_centered_text("BY RACE", size*140, 5*size,mkcolor(128, 128,255));
       draw_centered_text("HANDHELD DEVS", 155, 5*size,mkcolor(255, 0, 0));

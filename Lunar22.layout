@@ -2,34 +2,14 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="math-sll.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="video.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="9664" topLine="489" />
-		</Cursor>
-	</File>
-	<File name="video.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="16825" topLine="811" />
-		</Cursor>
-	</File>
-	<File name="gp2x_buttons.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="0" topLine="10" />
-		</Cursor>
-	</File>
-	<File name="video.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2293" topLine="81" />
-		</Cursor>
-	</File>
-	<File name="DT_drawtext.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="246" topLine="3" />
+			<Cursor1 position="2293" topLine="80" />
 		</Cursor>
 	</File>
 	<File name="lunar.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="47347" topLine="1109" />
+			<Cursor1 position="48703" topLine="1143" />
 		</Cursor>
 		<Folding>
 			<Collapse line="0" />
@@ -49,17 +29,37 @@
 			<Collapse line="849" />
 			<Collapse line="897" />
 			<Collapse line="918" />
-			<Collapse line="1053" />
-			<Collapse line="1063" />
-			<Collapse line="1075" />
-			<Collapse line="1089" />
-			<Collapse line="1136" />
-			<Collapse line="1144" />
+			<Collapse line="1057" />
+			<Collapse line="1067" />
+			<Collapse line="1079" />
+			<Collapse line="1093" />
+			<Collapse line="1140" />
+			<Collapse line="1148" />
 		</Folding>
 	</File>
-	<File name="lunar.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="video.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1664" topLine="29" />
+			<Cursor1 position="16825" topLine="811" />
+		</Cursor>
+	</File>
+	<File name="math-sll.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="9664" topLine="489" />
+		</Cursor>
+	</File>
+	<File name="lunar.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1691" topLine="73" />
+		</Cursor>
+	</File>
+	<File name="gp2x_buttons.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="10" />
+		</Cursor>
+	</File>
+	<File name="DT_drawtext.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="246" topLine="3" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
