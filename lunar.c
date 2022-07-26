@@ -259,6 +259,7 @@ float m0;                   // Masa inicial del LEM
 /******************* zooming and panning *****************************************/
 int s_x,s_y;                // Posición pantalla
 int o_x,o_y;                // panning
+float Gscale;               // Escala
 /***************** Variable con modelo ecuaciones diferenciales ******************/
 #define CNV 0.0174532928;   // factor conversión grados a radianes pi/180
 float x_thrust,y_thrust;    // Componentes x,y del vector impulso
@@ -667,11 +668,13 @@ extern void ScreenToWorld(int sx, int sy, float *wx, float *wy){
         *wy = (float) (sy - o_y);
 }
 
-
+/*
+*   SCALE MUST BE PUBLIC
+*/
 extern void WorldToScreen(float wx, float wy, int *sx, int *sy){
 
-        *sx = (int) (wx + o_x);
-        *sy = (int) (wy + o_y);
+        *sx = (int) (wx + o_x)/Gscale;
+        *sy = (int) (wy + o_y)/Gscale;
 }
 
 
@@ -968,8 +971,8 @@ while (SDL_PollEvent(&event) > 0) /*1*/
     			action[left_pressed] = 0; action[right_pressed] = 0;
     			action[up_pressed] =0;	  action[down_pressed] = 1;
     		}
-    		else if (key == SDLK_s)   { action[zoom_pressed] = -1;  }  /* Zoom _out */
-    		else if (key == SDLK_w)   { action[zoom_pressed] = 1;   }  /* Zoom_in */
+    		else if (key == SDLK_s)   { action[keys_pressed] = 1;  }  /* tecla s */
+    		else if (key == SDLK_w)   { action[keyw_pressed] = 1;   }  /* tecla w */
     		else if (key == SDLK_e)   { action[shift_pressed] = -1; }  /* shift left  */
     		else if (key == SDLK_d)   { action[shift_pressed] = 1;  }  /* shift right */
     		else if (key == SDLK_o)   { action[keyo_pressed] = 1; }  /* tecla o */
@@ -983,8 +986,8 @@ while (SDL_PollEvent(&event) > 0) /*1*/
         	else if (key == SDLK_LEFT) { action[left_pressed] = 0;  }
         	else if (key == SDLK_UP)   { action[up_pressed] = 0;    }
         	else if (key == SDLK_DOWN) { action[down_pressed] = 0; 	}
-        	else if (key == SDLK_s)    { action[zoom_pressed] = 0; 	}
-        	else if (key == SDLK_w)    { action[zoom_pressed] = 0;	}
+        	else if (key == SDLK_s)    { action[keys_pressed] = 0; 	}
+        	else if (key == SDLK_w)    { action[keyw_pressed] = 0;	}
             else if (key == SDLK_e)    { action[shift_pressed] = 0; }
         	else if (key == SDLK_d)    { action[shift_pressed] = 0;	}
         	else if (key == SDLK_o)   { action[keyo_pressed] = 0; }  /* tecla o */
@@ -1407,7 +1410,7 @@ int game(void)
   int h,hx,hy;      // Altura restante para llegar al suelo
   int scale;        // Nivel de zoom actual
   int scale_old;    // Nivel de zoom anterior
-  int actiond[8];   // Lista de posibles acciones en el juego
+  int actiond[13];   // Lista de posibles acciones en el juego
 
  // float xf,yf;      // Variables auxiliareas para gestión pantalla
   float dtime;       // diferencial de tiempo entre cada iteración
@@ -1563,12 +1566,14 @@ int game2(void)
  // Uint64 prev_time;
   int gas;          // nivel de impulso que se da al LEM
   int scale=1;        // Nivel de zoom actual
-  int actiond[10];   // Lista de posibles acciones en el juego
+  int actiond[13];   // Lista de posibles acciones en el juego
   int x_screen;
   int y_screen;
   int flag;
   int xl_left;
   int xl_right;
+  int yl_up;
+  int yl_down;
 
   /***************** Inicialización de variables ***************************/
   done = 0;                       quit = 0;
@@ -1577,6 +1582,7 @@ int game2(void)
   actiond[shift_pressed] = 0;	  actiond[zoom_pressed] = 0;
   actiond[keyo_pressed] = 0;      actiond[keyp_pressed] = 0;
   actiond[keyq_pressed] = 0;      actiond[keya_pressed] = 0;
+  actiond[keyw_pressed] = 0;      actiond[keys_pressed] = 0;
   scale = LEVEL;
   lives = 3;                      level = 1;
   player_alive = 1;               player_die_timer = 0;
@@ -1585,6 +1591,7 @@ int game2(void)
   gas =0;                         fuel=10800.0;
   flag = 0;
   o_x = 0;                         o_y = -1450;
+  Gscale = 1;
   //*********************************************************
 //  margen_izq = 40;                margen_dcho = WIDTH - margen_izq;
  // maxScx = Scx + WIDTH;           // Partimos de nivel de zoom mínimo (LEVEL)
@@ -1597,9 +1604,10 @@ int game2(void)
   SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));   // Limpia Pantalla
   SDL_Flip(screen);
 
-  xl_left = 40;
-  xl_right = WIDTH - 40;
-
+  xl_left = 40;                     // Límite izquierdo para panning automático
+  xl_right = WIDTH - 40;            // Límite derecho para panning automático
+  yl_up = 80;                       // Límite superior para panning automático (debe excluir zona maracadores)
+  yl_down = 400;                    // Límite inferior para panning automático
   /********************** Bucle principal ************************************/
   flag = 1;
   do
@@ -1640,6 +1648,16 @@ int game2(void)
             o_y = o_y + 10;                 actiond[keya_pressed]=0;
             flag = 1;
         }
+    if (actiond[keyw_pressed]){
+            Gscale = Gscale + 1 ;                  actiond[keyw_pressed]=0;
+            if (Gscale == 11) Gscale = 10;
+            flag = 1;
+        }
+    if (actiond[keys_pressed]){
+            Gscale = Gscale - 1;                 actiond[keys_pressed]=0;
+            if (Gscale == 0) Gscale = 1;
+            flag = 1;
+        }
       /**** Actualización de la pantalla *********************************/
 
     if (flag) {
@@ -1655,16 +1673,18 @@ int game2(void)
          WorldToScreen(x_pos,y_pos,&x_screen,&y_screen);
          if (x_screen <= xl_left) o_x = o_x + 10;
          if (x_screen >= xl_right) o_x = o_x - 10;
+         if (y_screen <= yl_up) o_y = o_y + 10;
+         if (y_screen >= yl_down) o_y = o_y - 10;
          WorldToScreen(x_pos,y_pos,&x_screen,&y_screen);
 /****************************************************************************************/
          y_screen = HEIGHT - y_screen;          // Ajuste para las funciones SDL
          draw_line2(x_screen,y_screen,mkcolor(255,255,255),x_screen+10,y_screen,mkcolor(255,255,255),0);
-         draw_terrain2(moon_b,scale);
+         draw_terrain2(moon_b,Gscale);
          SDL_Flip(screen);
          SDL_Delay(1);
          printf ("X Móvil : %d\t Y Móvil : %d\n",(int) x_pos, (int) y_pos);
          printf ("x pant. : %d\t y pant. : %d\n",x_screen,y_screen);
-         printf ("offset x: %d\t offest y: %d\n",o_x,o_y);
+         printf ("offset x: %d\t offest y: %d\tGscale:%d\n",o_x,o_y,(int) Gscale);
          flag = 0;
      }
 

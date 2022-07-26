@@ -88,4 +88,4 @@ typedef struct bit_type {
   int xm, ym;
 } bit_type;
 
-enum {left_pressed,right_pressed,up_pressed,down_pressed,zoom_pressed,shift_pressed,keyo_pressed, keyp_pressed,keyq_pressed, keya_pressed};
+enum {left_pressed,right_pressed,up_pressed,down_pressed,keyw_pressed,keys_pressed,keyo_pressed, keyp_pressed,keyq_pressed, keya_pressed, zoom_pressed, shift_pressed};

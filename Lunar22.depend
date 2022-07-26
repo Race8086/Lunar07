@@ -4,12 +4,12 @@
 	<string.h>
 	<SDL/SDL.h>
 
-1658773359 source:/home/race/Lunar22/lunar.c
+1658822130 source:/home/race/Lunar22/lunar.c
 	"lunar.h"
 	"video.h"
 	<SDL/SDL_gfxPrimitives.h>
 
-1658773224 /home/race/Lunar22/lunar.h
+1658820917 /home/race/Lunar22/lunar.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
