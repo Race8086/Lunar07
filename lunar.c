@@ -61,45 +61,6 @@ Revisión general del juego, puesta al día tras el parón
           Este efecto de la masa se empezará a percibir en las últimas bases
           ya que aunque se bonifique el fuel neto será menor en cada alunizaje
 
-28-4-2007 ************** PENDIENTE ***************************
-
-*** Lógica juego
-
-[ ]  Implementación de niveles de dificultad
-[ ]  Calculo puntuación dependiente además del nivel
-[ ]  Terminar partida cuando aluniza en las 6 bases
-[x]  Menú de inicio de juego y selección de nivel
-[ ]  Tabla de puntuaciones
-
-
-
-*** Motor gráfico y física
-
-[X]  Comprobación de distancia a terreno exacta: distancia de punto a recta
-[ ]  Scroll horizontal cuando se alcanzan los límites de pantalla
-[ ]  Scroll vertical , dentro de área de zoom
-[ ]  Terreno continuo en eje X
-[ ]  Control de los retrocohetes más preciso
-[x]  Ajustar valores empuje motores
-[x]  fisica dependiente de masa de cohete dependiente consumo de fuel
-[-]  Implementar más letras y caracteres vectoriales  10-8-2007
-[X]  Repasar LEM y estela de motores
-[X]  Rutina de Explosión de la nave
-[X]  Perfeccionar rutina que informa del resultado del alunizaje
-[ ]  Inclusión imágenes menús, puntuaciones, presentación
-< >  Aumentar resolución del terreno y pintar más o menos en función escala
-
-*** Sonido
-[ ]  Inclusión efectos ( cohetes con gradación en función del impulso
-                       ( explosión
-                       ( sonido ambiente :
-                       ( Alunizaje : mensaje N.Amtrong
-
-[ ] Musica             ( Presentación del Juego / Menú de selección
-                       ( in-game
-                       ( creditos / extras
-*** Plataforma GP2X
- [X] Añadir lectura de joy & botones     13-8-2007
 
 27/06/2022 ************ Revision integral
 
@@ -150,9 +111,48 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 25/07/2022
 
   Creación de un cjo de funciones genéricas para manejo de zoom y pann
+
+26/07/2022
+
+  Versión que incorpora funciones para zooming / panning en 2D.
+  game2, función para probar la implementación de zooming y panning
+  Esta versión es el punto de partida para modificar la función game
+  para que incorpore las nuevas funciones implementadas.
+
 */
 
+/* TODO **************************************************************
 
+*** Bugs
+
+    [           ] Error en el cálculo de la distancia al terreno al situarse sobre una base.
+
+*** Lógica juego
+
+[ ]  Implementación de niveles de dificultad
+[ ]  Calculo puntuación dependiente además del nivel
+[ ]  Terminar partida cuando aluniza en las 6 bases
+[ ]  Tabla de puntuaciones
+
+
+
+*** Motor gráfico y física
+
+[ ]  [DD/MM/YYYY]   Scroll horizontal cuando se alcanzan los límites de pantalla.
+[ ]  [DD/MM/YYYY]   Scroll vertical , dentro de área de zoom.
+[ ]  [DD/MM/YYYY]   Terreno continuo en eje X.
+[ ]  [DD/MM/YYYY]   Control de los retrocohetes más preciso.
+[ ]  [DD/MM/YYYY]   Incluir en la física : masa y rozamiento.
+[ ]  [DD/MM/YYYY]   Inclusión imágenes menús, puntuaciones, presentación.
+[ ]  [DD/MM/YYYY]   Aumentar resolución del terreno y pintar más o menos en función escala.
+
+*** Sonido
+[ ]  [DD/MM/YYYY]   Inclusión efectos ( cohetes con gradación en función del impulso
+                       ( explosión
+                       ( sonido ambiente :
+                       ( Alunizaje : mensaje N.Amtrong
+
+*/
 
 
 #include "lunar.h"
@@ -353,7 +353,7 @@ int explo_lem[16][4] =
 
 };
 
-terrain  moon_a [129] = {          // Terreno, cada punto X,Y absolutas
+terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	0		,	1600	},
 {	50  	,	1800	},
 {	100		,	2006	},
@@ -486,7 +486,7 @@ terrain  moon_a [129] = {          // Terreno, cada punto X,Y absolutas
 };
 
 
-terrain  moon_b [129] = {          // Terreno, cada punto X,Y absolutas
+terrain  moon_b [129] = {          // Terreno 2 , cada punto X,Y absolutas
 {	0		,	1600	},
 {	50  	,	1800	},
 {	100		,	1700	},
@@ -658,23 +658,32 @@ terrain star[11] =                  // Stars, cada punto X,Y absolutas
             si esiste una conversión de escala (zoom )
     CE:     sx Coordenada X a convertir
             sy Coordenada Y a convertir
-    CEI:    Es necesario que sean visibles las variables de offset actuales ox , oy
+    CEI:    Es necesario que sean visibles las variables de offset actuales o_x , o_y y Gscale.
     CS:     wx Coordenada X convertida
             wy Coordenda Y convertida
+/*
+*   Gscale MUST BE PUBLIC
 */
+
 extern void ScreenToWorld(int sx, int sy, float *wx, float *wy){
 
-        *wx = (float) (sx - o_x);
-        *wy = (float) (sy - o_y);
+        *wx = (float) ((sx/Gscale) - (float) o_x);
+        *wy = (float) ((sy/Gscale) - (float) o_y);
 }
 
 /*
-*   SCALE MUST BE PUBLIC
+*   DESC:   Convierte coordenadas del mundo en las coordenadas de pantalla, tiene en cuenta
+            si esiste una conversión de escala (zoom )
+    CE:     wx Coordenada X a convertir
+            wy Coordenada Y a convertir
+    CEI:    Es necesario que sean visibles las variables de offset actuales o_x , o_y, GScale
+    CS:     sx Coordenada X convertida
+            sy Coordenda Y convertida
 */
 extern void WorldToScreen(float wx, float wy, int *sx, int *sy){
 
-        *sx = (int) (wx + o_x)/Gscale;
-        *sy = (int) (wy + o_y)/Gscale;
+        *sx = (int) ((wx + o_x)/Gscale);
+        *sy = (int) ((wy + o_y)/Gscale);
 }
 
 
