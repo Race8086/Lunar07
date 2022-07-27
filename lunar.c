@@ -125,7 +125,9 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 
 *** Bugs
 
-    [           ] Error en el cálculo de la distancia al terreno al situarse sobre una base.
+    [   27/07/2022        ] Error en el cálculo de la distancia al terreno al situarse sobre una base.
+    El error consistía en que dentro de la función check_dist, para el cálculo de la distancia horizontal
+    se dividía por m. el error de desbordamiento ocurre encima de una base cuando m = 0 (división por cero)
 
 *** Lógica juego
 
@@ -153,7 +155,8 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
                        ( Alunizaje : mensaje N.Amtrong
 
 */
-
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 #include "lunar.h"
 #include "video.h"
@@ -354,7 +357,7 @@ int explo_lem[16][4] =
 };
 
 terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
-{	0		,	1600	},
+{	0		,	1600	},         // 0
 {	50  	,	1800	},
 {	100		,	2006	},
 {	150		,	2200	},         // Máxima cota del terreno
@@ -364,7 +367,7 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	350		,	2050	},
 {	400		,	1975	},
 {	450		,	1900	},
-{	500		,	1850	},
+{	500		,	1850	},//10
 {	550		,	1825	},
 {	600		,	1815	},
 {	650		,	1700	},
@@ -374,7 +377,7 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	850		,	1600	},
 {	900		,	1578	},
 {	950		,	1500	},
-{	1000	,	1400	},
+{	1000	,	1400	},//20
 {	1050	,	1350	},
 {	1100	,	1300	},
 {	1150	,	1200	},
@@ -384,7 +387,7 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	1350	,	1100	},
 {	1400	,	1150	},
 {	1450	,	1150	},
-{	1500	,	1200	},
+{	1500	,	1200	},//30
 {	1550	,	1225	},
 {	1600	,	1300	},
 {	1650	,	1325	},
@@ -394,7 +397,7 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	1850	,	1500	},
 {	1900	,	1550	},
 {	1950	,	1600	},
-{	2000	,	1610	},
+{	2000	,	1610	},//40
 {	2050	,	1620	},
 {	2100	,	1640	},
 {	2150	,	1660	},
@@ -404,7 +407,7 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	2350	,	1700	},
 {	2400	,	1725	},
 {	2450	,	1750	},
-{	2500	,	1770	},
+{	2500	,	1770	},//50
 {	2550	,	1790	},
 {	2600	,	1800	},
 {	2650	,	1820	},
@@ -414,7 +417,7 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	2850	,	2050	},
 {	2900	,	2100	},
 {	2950	,	2000	},
-{	3000	,	1900	},
+{	3000	,	1900	},//60
 {	3050	,	1850	},
 {	3100	,	1800	},
 {	3150	,	1700	},
@@ -424,13 +427,13 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	3350	,	1300	},
 {	3400	,	1200	},
 {	3450	,	1100	},
-{	3500	,	1000	},
+{	3500	,	1000	},//70
 {	3550	,	900		},
 {	3600	,	800		},
 {	3650	,	700		},
 {	3700	,	750		},
-{	3750	,	600		},
-{	3800	,	600		}, // base 3
+{	3750	,	600		},//75
+{	3800	,	600		}, // base 3 //76
 {	3850	,	600		},
 {	3900	,	700		},
 {	3950	,	740		},
@@ -661,7 +664,7 @@ terrain star[11] =                  // Stars, cada punto X,Y absolutas
     CEI:    Es necesario que sean visibles las variables de offset actuales o_x , o_y y Gscale.
     CS:     wx Coordenada X convertida
             wy Coordenda Y convertida
-/*
+
 *   Gscale MUST BE PUBLIC
 */
 
@@ -1174,7 +1177,7 @@ float check_fuel(float thrust, float dt)
     return dfuel;
 }
 
-/***********************************************************************
+/***************************************************************************
 * check_dist: Calcula distancia al terreno
 *   Entradas : x0: Posicion X absoluta
 *              y0: Posición Y absoluta
@@ -1185,9 +1188,8 @@ float check_fuel(float thrust, float dt)
 *    y = y1 + ( y2-y1)/(x2-x1) * ( x -x1)
 *
 *   nota 1: Siempre que la posisción Y sea > Cota máxima del terreno
-*                 no es necesario efectuar los cálculos de distancia
-*                 en horizontal
-************************************************************************
+*           no es necesario efectuar los cálculos de distancia en horizontal
+****************************************************************************
 */
 
 int check_dist(int *distx,int *disty, int xp, int yp, terrain topo[])
@@ -1198,14 +1200,13 @@ int check_dist(int *distx,int *disty, int xp, int yp, terrain topo[])
  int dist = 0;
  //int x1,x2,y1,y2;
 
- j = xp/50.0;      // ubicar los puntos de la sección de terreno
+  j = xp/50.0;      // ubicar los puntos de la sección de terreno
  i = (int) j;
  if ((i-j)==0)
  { // Punto exacto
             dist = yp - topo[i].y;
             *disty = dist;
-            *distx = dist;  // Este caso es complicado
-            // no lo implementamos aún.
+            *distx = dist;  // Este caso es complicado, no lo implementamos aún.
  }
 else
  { // Interseccion con recta entre dos puntos
@@ -1213,12 +1214,19 @@ else
      j = topo[i].y + m * (xp-topo[i].x); // Distancia eje y
      dist = yp - (int) j;
      *disty = dist;
-     if (yp < 2100)   // ver nota 1
+     if (yp < 2200)   // ver nota 1
      {
-        j = topo[i].x + (yp -topo[i].y) / m; // Distancia eje x
-        dist = abs (xp - (int)j);
+        if (m!=0) {
+            j = topo[i].x + (yp -topo[i].y) / m; // Distancia eje x
+            dist = abs (xp - (int)j);
+            *distx = dist;
+        } else {
+            *distx = 9999+40;} // 10000 = Solución de contingencia para no desbordar
+     }  else
+     {
+            *distx = 9999+40;      // 10000 = no hay peligro de colisión en eje X
      }
-     *distx = dist;
+
  }
 
 
@@ -1308,6 +1316,8 @@ void fisica(float thrust,int gangle, float dt)
  x_pos = x_posant + x_vel * dt; // Desplazmiento
  y_pos = y_posant + y_vel * dt;
  loop++;
+ //fprintf(fi,"%f\t%f\t%f\t%f\t%f\t\n",dt,x_vel,y_vel,x_pos,y_pos);
+
  // Preparamos variables para siguiente interación
  x_vant = x_vel;
  y_vant = y_vel;
@@ -1435,7 +1445,7 @@ int game(void)
   player_alive = 1;               player_die_timer = 0;
   angle = 90;                     Scx =0;     Scy = 0;
   fSct =0;                        x_scroll=0; y_scroll=0;
-  x=3200;                         y=3200;
+  x=3780;                         y=2200;
   x_pos = x;  y_pos = y;          x_posant = x;  y_posant = y;
   gas =0;                         fuel=10800.0;
 
@@ -1449,7 +1459,8 @@ int game(void)
 
   prev_time = SDL_GetTicks(); // toma referencia de tiempos
   curr_time = prev_time;
-
+//fprintf(fi,"dt\t\t\tx_vel\t\ty_vel\t\tx_pos\t\ty_pos\n");
+fprintf(fi,"hx\thy\tx\ty\t --- hx\thy\tx\ty\n",hx,hy,x,y);
   /********************** Bucle principal ************************************/
   do
     {
@@ -1498,15 +1509,20 @@ int game(void)
     curr_time = SDL_GetTicks();              // Calcular
     dtime = curr_time - prev_time;           // el paso
     prev_time = curr_time;                   //  del iempo
+    //printf("%"PRIu64"\n",dtime);
+    //fprintf(fi,"%f\t",dtime);
     fisica(impulso[gas],angle,dtime/1000);   //  acc, vel, desp, consumo de fuel
     /**********************************/
     x = (int)round(x_pos);
     y = (int)round(y_pos);
-    check_dist(&hx,&hy,x,y,moon_a);
+//    fprintf(fi,"%d\t%d\t%d\t%d\t --- ",hx,hy,x,y);
+
+       check_dist(&hx,&hy,x,y,moon_a);
+//    fprintf(fi,"%d\t%d\t%d\t%d\n",hx,hy,x,y);
     h = hy;
     /****************** Ajuste de cámara en función de la distancia al suelo **/
-    //scale = zoom_auto(h);
-    scale = zoom_manual(actiond[zoom_pressed],scale);
+    scale = zoom_auto(h);
+    //scale = zoom_manual(actiond[zoom_pressed],scale);
     if (scale != scale_old)
     {
        update_camera(x,y,scale,&Scx,&Scy,&snapScx,&maxScx);
@@ -1522,7 +1538,7 @@ int game(void)
     }
     scroll_check(&Scx, x_pos/zoom[scale],scale);
     if (scale == LEVEL) scroll_manual(&actiond[shift_pressed],scale, zoom[scale],x_pos);
-    printf ("x lander = %f (x screen) = %f\n",x_pos, x_pos/zoom[scale]);
+    //printf ("x lander = %f (x screen) = %f\n",x_pos, x_pos/zoom[scale]);
     if (x_pos<=0) x_pos = x_pos + MOON_MAX_X;
     else if (x_pos>=MOON_MAX_X) x_pos = x_pos -MOON_MAX_X;
     x = (int)round(x_pos);
@@ -2312,7 +2328,7 @@ int main(int argc, char * argv[])
           }
           case 2: // Jugar
           {
-            done = game2();
+            done = game();
             break;
           }
           case 3: // Menú de configuración
