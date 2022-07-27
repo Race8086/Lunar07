@@ -90,7 +90,7 @@ void draw_terrain(terrain t_a[],int scr,int level);
 void draw_terrain2(terrain t_a[],int escala);
 void draw_bases(landing_zone bs[],int scr,int level);
 void draw_stars(terrain s[],int level);
-void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, int r,int level,color_type cf);
+void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, float r,int level,color_type cf);
 void draw_explo(int l_exp[][4], int x0,int y0, int angle2, int r,int level,color_type cf);
 void draw_score(float lfuel,int lhy,int lhx,int lym, int lxm);
 void draw_fuel(int nivel, int x, int y);

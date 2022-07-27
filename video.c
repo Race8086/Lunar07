@@ -847,7 +847,7 @@ void draw_terrain2(terrain t_a[],int escala)
 ************************************************************************
 */
 
-void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, int r,int level,color_type cf)
+void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, float r,int level,color_type cf)
 
 { /* Begin draw_lander */
   int i;
@@ -868,8 +868,8 @@ void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, int r,int le
   for (i=0; i<(RESLANDER-6+tl);i++)
   {
 
-	  draw_segment( lander[i][0]*r/zoom_lander[level],lander[i][1], c,
-		       lander[i][2]*r/zoom_lander[level],lander[i][3], c,
+	  draw_segment( (int) (lander[i][0]*r/zoom_lander[level]),lander[i][1], c,
+		       (int) (lander[i][2]*r/zoom_lander[level]),lander[i][3], c,
 		        x0, HEIGHT -  y0,
 		       angle2,level);
   }

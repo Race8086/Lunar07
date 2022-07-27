@@ -110,7 +110,7 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 
 25/07/2022
 
-  Creación de un cjo de funciones genéricas para manejo de zoom y pann
+  Creación de un cjo de funciones genéricas para manejo de zoom y pann.
 
 26/07/2022
 
@@ -118,6 +118,12 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
   game2, función para probar la implementación de zooming y panning
   Esta versión es el punto de partida para modificar la función game
   para que incorpore las nuevas funciones implementadas.
+
+27/07/2022
+
+  Resuelto bug de cálculo de distancia. (ver sección BUG)
+  Se ha cambiado el tipo del parámetro r de la función draw_lander a float,
+  para ajustar mejor el tamaño del lander
 
 */
 
@@ -128,6 +134,7 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
     [   27/07/2022        ] Error en el cálculo de la distancia al terreno al situarse sobre una base.
     El error consistía en que dentro de la función check_dist, para el cálculo de la distancia horizontal
     se dividía por m. el error de desbordamiento ocurre encima de una base cuando m = 0 (división por cero)
+    Se ha optado por una solución aproximada, pero más realista que la inicial.
 
 *** Lógica juego
 
@@ -765,11 +772,11 @@ fi = fopen( "./log", "w" );
  //     Draw_Init();// Probamos SDL_draw
       SDL_ShowCursor(SDL_ENABLE); SDL_ShowCursor(SDL_DISABLE);
       pixels=(Uint8 *) screen->pixels;
-      printf(" Pixels (puntero de inicio = %d\n",*pixels);
-printf(" w (Ancho en pixels = %d\n",screen->w);
-printf(" h (Alto en pixels = %d\n",screen->h);
-printf(" Pitch (Long bytes linea = %d\n",screen->pitch);
-
+/*    printf(" Pixels (puntero de inicio = %d\n",*pixels);
+      printf(" w (Ancho en pixels = %d\n",screen->w);
+      printf(" h (Alto en pixels = %d\n",screen->h);
+      printf(" Pitch (Long bytes linea = %d\n",screen->pitch);
+*/
 
   /* Load background image: */
 #ifdef GP2X
@@ -1177,6 +1184,56 @@ float check_fuel(float thrust, float dt)
     return dfuel;
 }
 
+/**************************************************************************
+* check_dh:     Obtiene la primera cota más alta que la posición del lem
+* CE:           t:      Terreno
+*               i:      pto más cercano por la izq del lem
+*               cota:   Cota Y del lem
+*               dir:    sentido de la búsqueda : 1 > hacia la dcha, -1 hacia la izq
+* CS:           Valor de la cota.
+*               = <0 : no encontrada cota superior o cota alejada más de 1000 m.
+*               = >0 : distancia calculada.
+* Descripción:  Recorre el array hasta encontrar el punto o haber recorrido
+*               una distancia en horizontal superior a 1000 m.
+*               En esta primera versión la distancia se aproxima a la resolución
+*               del terreno, realmente se debería aplicar la distancia de punto
+*               a recta.
+* NOTA:         No se comprueba que el valor de dir pueda ser otro. el resultado
+*               será impredicible.
+* Fecha Act:    27/07/2022
+*************************************************************************/
+
+int check_dh (terrain t[],int cota, int i,int dir){
+
+    int x1;       // cota x y
+    /*
+    int x2;       // cota x anterior
+    int y1,y2;    // cota y y cota y anterior
+    */
+    //int j;        // variable auxiliar
+    int exit_for; // variable para salir del bucle for
+    int drrec = 0;
+    exit_for = 0;
+    x1 = i;
+    while ( (! exit_for) && (drrec < 1000) ) {
+        //j = i;
+        i = (i + dir);
+        if (i == 0) i = 128 ;       // Recorrido circular
+        else if (i == 128) i = 0;      // en ambas direcciones
+        drrec += 50;                // anotamos distancia aprox
+        if (t[i].y >= cota) {
+                exit_for = 1;       // hemos terminado
+        }
+        if (x1 == i){
+
+                exit_for = 1;       // hemos terminado
+                drrec = -1;     //  no encontrada
+        }
+
+    }
+    if (drrec == 1000) drrec = -1;
+    return drrec;
+}
 /***************************************************************************
 * check_dist: Calcula distancia al terreno
 *   Entradas : x0: Posicion X absoluta
@@ -1221,7 +1278,11 @@ else
             dist = abs (xp - (int)j);
             *distx = dist;
         } else {
-            *distx = 9999+40;} // 10000 = Solución de contingencia para no desbordar
+
+            dist = check_dh(topo,yp,i,-1);
+            if (dist>0) *distx = dist;
+            else        *distx = 9999+40; // 10000 = Solución de contingencia para no desbordar
+            }
      }  else
      {
             *distx = 9999+40;      // 10000 = no hay peligro de colisión en eje X
@@ -1231,7 +1292,7 @@ else
 
 
 
- return dist;
+ return *disty;
 
 }
 
@@ -1460,7 +1521,7 @@ int game(void)
   prev_time = SDL_GetTicks(); // toma referencia de tiempos
   curr_time = prev_time;
 //fprintf(fi,"dt\t\t\tx_vel\t\ty_vel\t\tx_pos\t\ty_pos\n");
-fprintf(fi,"hx\thy\tx\ty\t --- hx\thy\tx\ty\n",hx,hy,x,y);
+//fprintf(fi,"hx\thy\tx\ty\t --- hx\thy\tx\ty\n",hx,hy,x,y);
   /********************** Bucle principal ************************************/
   do
     {
@@ -1552,7 +1613,7 @@ fprintf(fi,"hx\thy\tx\ty\t --- hx\thy\tx\ty\n",hx,hy,x,y);
      draw_stars(star,scale);                                            // Dibuja estrellas
      draw_score(fuel,hy,hx,(int) y_vel, (int) x_vel);                   // Dibuja Indicadores
      draw_fuel (gas,120,5);
-     draw_lander(Plander,x,y,angle,gas,2*WIDTH/ASPECT,scale,mkcolor(255,255,255));   // Dibuja el LEM
+     draw_lander(Plander,x,y,angle,gas,1.5*WIDTH/ASPECT,scale,mkcolor(255,255,255));   // Dibuja el LEM
 
      //**** gestión Alunizaje *********************************
     j = check_ground(h,hx,x_vel, y_vel,1);
