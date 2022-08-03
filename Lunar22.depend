@@ -4,7 +4,7 @@
 	<string.h>
 	<SDL/SDL.h>
 
-1658936637 source:/home/race/Lunar22/lunar.c
+1659546750 source:/home/race/Lunar22/lunar.c
 	<inttypes.h>
 	"lunar.h"
 	"video.h"
@@ -30,7 +30,7 @@
 
 997820930 /home/race/Lunar22/DT_drawtext.h
 
-1658936674 /home/race/Lunar22/video.h
+1659541820 /home/race/Lunar22/video.h
 	<stdio.h>
 	<stdlib.h>
 	<unistd.h>

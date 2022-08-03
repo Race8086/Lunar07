@@ -163,6 +163,11 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 
 */
 #define __STDC_FORMAT_MACROS
+
+#define MAX(A,B)  ((A)>(B)?(A):(B))  /* Maximum number between two */
+
+#define MIN(A,B)  ((A)>(B)?(B):(A))  /* Minimum number between two */
+
 #include <inttypes.h>
 
 #include "lunar.h"
@@ -180,6 +185,8 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 #define DEBUG
 extern Uint8 *pixels;
 extern Uint32 MUL320[240];
+
+
 
 FILE *fi;
 
@@ -1191,8 +1198,7 @@ float check_fuel(float thrust, float dt)
 *               cota:   Cota Y del lem
 *               dir:    sentido de la búsqueda : 1 > hacia la dcha, -1 hacia la izq
 * CS:           Valor de la cota.
-*               = <0 : no encontrada cota superior o cota alejada más de 1000 m.
-*               = >0 : distancia calculada.
+*               Si no se encuentra, se asigna un valor de 10000 m.
 * Descripción:  Recorre el array hasta encontrar el punto o haber recorrido
 *               una distancia en horizontal superior a 1000 m.
 *               En esta primera versión la distancia se aproxima a la resolución
@@ -1201,8 +1207,9 @@ float check_fuel(float thrust, float dt)
 * NOTA:         No se comprueba que el valor de dir pueda ser otro. el resultado
 *               será impredicible.
 * Fecha Act:    27/07/2022
+*               02/08/2022      Cambiado parámetro de retorno
 *************************************************************************/
-
+#define MAX_DIST 1000   // no busca cota más allá de 1 km
 int check_dh (terrain t[],int cota, int i,int dir){
 
     int x1;       // cota x y
@@ -1215,7 +1222,7 @@ int check_dh (terrain t[],int cota, int i,int dir){
     int drrec = 0;
     exit_for = 0;
     x1 = i;
-    while ( (! exit_for) && (drrec < 1000) ) {
+    while ( (! exit_for) && (drrec < MAX_DIST) ) {
         //j = i;
         i = (i + dir);
         if (i == 0) i = 128 ;       // Recorrido circular
@@ -1227,11 +1234,12 @@ int check_dh (terrain t[],int cota, int i,int dir){
         if (x1 == i){
 
                 exit_for = 1;       // hemos terminado
-                drrec = -1;     //  no encontrada
+                drrec = 10000 + FC_X ;    //  no encontrada
         }
 
     }
-    if (drrec == 1000) drrec = -1;
+    if (drrec == 1000) drrec = 10000 + FC_X;
+
     return drrec;
 }
 /***************************************************************************
@@ -1246,6 +1254,7 @@ int check_dh (terrain t[],int cota, int i,int dir){
 *
 *   nota 1: Siempre que la posisción Y sea > Cota máxima del terreno
 *           no es necesario efectuar los cálculos de distancia en horizontal
+*   03/08/2022 : ultima versión que incorpora correctamente el uso de check_dh
 ****************************************************************************
 */
 
@@ -1255,6 +1264,7 @@ int check_dist(int *distx,int *disty, int xp, int yp, terrain topo[])
  int i;
  float j;
  int dist = 0;
+ int distaux = 0;
  //int x1,x2,y1,y2;
 
   j = xp/50.0;      // ubicar los puntos de la sección de terreno
@@ -1279,18 +1289,15 @@ else
             *distx = dist;
         } else {
 
-            dist = check_dh(topo,yp,i,-1);
-            if (dist>0) *distx = dist;
-            else        *distx = 9999+40; // 10000 = Solución de contingencia para no desbordar
+            dist = check_dh(topo,yp,i,-1);      // comprobamos distancia hacia la izq
+            distaux = check_dh(topo,yp,i,1);      // comprobamos distancia hacia la dcha
+            if ( (dist>0) && (distaux >0))  *distx = MIN(dist,distaux) ; // Tomamos la menor de las distancias
+            else     {   *distx = 10000 + FC_X ;// 10000 = Solución de contingencia para no desbordar
             }
-     }  else
-     {
-            *distx = 9999+40;      // 10000 = no hay peligro de colisión en eje X
-     }
+        }
 
- }
-
-
+     }  else   *distx = 10000 + FC_X;      // 10000 = no hay peligro de colisión en eje X
+ }// Interseccion con recta entre dos puntos
 
  return *disty;
 
@@ -1651,7 +1658,7 @@ int game2(void)
  // Uint64 curr_time;
  // Uint64 prev_time;
   int gas;          // nivel de impulso que se da al LEM
-  int scale=1;        // Nivel de zoom actual
+ // int scale=1;        // Nivel de zoom actual
   int actiond[13];   // Lista de posibles acciones en el juego
   int x_screen;
   int y_screen;
@@ -1669,7 +1676,7 @@ int game2(void)
   actiond[keyo_pressed] = 0;      actiond[keyp_pressed] = 0;
   actiond[keyq_pressed] = 0;      actiond[keya_pressed] = 0;
   actiond[keyw_pressed] = 0;      actiond[keys_pressed] = 0;
-  scale = LEVEL;
+//  scale = LEVEL;
   lives = 3;                      level = 1;
   player_alive = 1;               player_die_timer = 0;
   x=320;                         y=240;

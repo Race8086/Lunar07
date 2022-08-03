@@ -1,11 +1,11 @@
 /*
 video.h cabecera con prototipos de funciones
 */
-/*
+
 #include <stdio.h>
 #include <stdlib.h>
 #include<unistd.h>
-*/
+
 #include <SDL/SDL.h>
 
 #include <string.h>
