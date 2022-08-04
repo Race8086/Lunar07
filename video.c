@@ -1163,9 +1163,9 @@ void draw_image(char *cual,int xi,int yi)
 
      if (image == NULL)
      {
-    	 #ifdef DEBUG
-    		frpintf(fi,"\n pinta_imagen: %s ERR:%s\n",cual,SDL_GetError());
-    	 #endif
+    	 //#ifdef DEBUG
+    		printf("\n pinta_imagen: %s ERR:%s\n",cual,SDL_GetError());
+    	 //#endif
      }
      else
      {
@@ -1186,9 +1186,9 @@ void draw_image(char *cual,int xi,int yi)
 }
 else
 {
-    #ifdef DEBUG
-    		frpintf(fi,"\n pinta_imagen: %s ERR:%s\n",cual,SDL_GetError());
-     #endif
+    //#ifdef DEBUG
+    		printf("\n pinta_imagen: %s ERR:%s\n",cual,SDL_GetError());
+     //#endif
 
 }
 

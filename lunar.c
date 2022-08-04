@@ -179,7 +179,7 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 #define MAX_ANGLE 10
 #define CHAN_THRUST 0
 #define DATAPATH "small/"
-#define DEP
+
 //#define SOUND
 //#define MUSIC
 #define DEBUG
@@ -231,8 +231,9 @@ char * mus_game_name = "./data/a.dat";
 
 /* Globals: */
 
-SDL_Surface *screen;
-SDL_Surface *bkgd , *icon, *portby;
+SDL_Surface *screen;        // Superfice para el juego
+SDL_Surface *bkgd;          // Superfice para imágenes
+SDL_Surface *icon, *portby;
 #ifdef GP2X
 	SDL_Joystick *joystick;
 #endif
@@ -305,21 +306,19 @@ float impulso[] =           // Impulso de los motores ( 10 niveles ) en Kg/s
 /*************** Variables gestión representación en pantalla *****************/
 float ox;                   // offset en el eje x para hacer panning
 float oy;                   // offset en el eje y para hacer panning
-
 float Scx,                  // origen del viewport para centrar la cámara en zonas de
       Scy;                  // mayor superficie que la pantalla
 float x_scroll,             // scroll en eje X
       y_scroll;             // scroll en eje Y
 int   scroll=0;             // Flag scroll
 float fSct;                 // tbd
-float uds_scroll=0;          // uds de desplazamiento el viewport
+//float uds_scroll=0;          // uds de desplazamiento el viewport
 int   margen_izq;           // Limite izquierdo para hacer scroll
 int   margen_dcho;          // Limite derecho para hacer scroll
 float maxScx;               // Máximo desplazamiento en horizontal de scroll
 float snapScx;              // Punto de partida del desplazamiento
 /**************** Datos del terreno, bases , LEM , espacio ********************/
 int res_x = 50;      // Resolucion eje X
-
 int Plander[25][4] ={                        // LEM (vector inicio,vector final)
                                              //      coordenadas polares
                {3,   270,  5,   293},
@@ -369,7 +368,6 @@ int explo_lem[16][4] =
 
 
 };
-
 terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	0		,	1600	},         // 0
 {	50  	,	1800	},
@@ -501,8 +499,6 @@ terrain  moon_a [129] = {          // Terreno 1, cada punto X,Y absolutas
 {	6350	,	1500	},
 {	6400	,	1600	}
 };
-
-
 terrain  moon_b [129] = {          // Terreno 2 , cada punto X,Y absolutas
 {	0		,	1600	},
 {	50  	,	1800	},
@@ -634,10 +630,6 @@ terrain  moon_b [129] = {          // Terreno 2 , cada punto X,Y absolutas
 {	6350	,	1500	},
 {	6400	,	1600	}
 };
-
-
-// Game Bases
-
 landing_zone base[6] ={            // Bases, X,Y,Puntos,
                                    //    estado : 0= sin alunizar, 1= alunizada
 {800,1600,200,0},
@@ -647,8 +639,6 @@ landing_zone base[6] ={            // Bases, X,Y,Puntos,
 {5000,2100,150,0},
 {5700,400,800,0}
 };
-
-
 terrain star[11] =                  // Stars, cada punto X,Y absolutas
 {
 {   320     ,   3100    },
@@ -663,13 +653,10 @@ terrain star[11] =                  // Stars, cada punto X,Y absolutas
 {	6000	,	2600	},
 {	6250	,	3100	},
 };
-
-
-
-/*******************************************************************************************/
+/*************** FUNCIONES DEL MODELO *****************************************/
+/******************************************************************************/
 // Funciones para panning y zooming
-/*******************************************************************************************/
-
+/******************************************************************************/
 /*
 *   DESC:   Convierte coordenadas de pantalla en las coordenadas del mundo real, tiene en cuenta
             si esiste una conversión de escala (zoom )
@@ -678,16 +665,13 @@ terrain star[11] =                  // Stars, cada punto X,Y absolutas
     CEI:    Es necesario que sean visibles las variables de offset actuales o_x , o_y y Gscale.
     CS:     wx Coordenada X convertida
             wy Coordenda Y convertida
-
 *   Gscale MUST BE PUBLIC
 */
-
 extern void ScreenToWorld(int sx, int sy, float *wx, float *wy){
 
         *wx = (float) ((sx/Gscale) - (float) o_x);
         *wy = (float) ((sy/Gscale) - (float) o_y);
 }
-
 /*
 *   DESC:   Convierte coordenadas del mundo en las coordenadas de pantalla, tiene en cuenta
             si esiste una conversión de escala (zoom )
@@ -703,8 +687,15 @@ extern void WorldToScreen(float wx, float wy, int *sx, int *sy){
         *sy = (int) ((wy + o_y)/Gscale);
 }
 
-
-
+/*
+    finish()
+    DESC:   Terminación del programa. Exencialmente finaliza SDL
+    CE:
+    CEI:
+    CS:
+    NOTAS:
+    FACT:
+*/
 void finish(void)
 {
 #ifdef DEBUG
@@ -718,24 +709,26 @@ fclose(fi);
 			chdir("/usr/gp2x");
 			execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
 #else
-			SDL_Quit();
-
+	SDL_Quit();
 #endif
-
   exit(0);
 }
-/**************************************************************************
-* setup
-*      Inicialización de sistema de vídeo, audio, input y timers SDL
-*      Carga de imágenes y archivos de sonido
-*
-***************************************************************************/
+/*
+    setup()
+    DESC:   Inicialización de sistema de vídeo, audio, input y timers SDL.
+            Carga las imágenes y archivos de sonido que se usarán.
+    CE:
+    CEI:
+    CS:
+    NOTAS:
+    FACT:
+*/
 void setup(void)
 {
-    #ifdef SOUND
+#ifdef SOUND
   int i;
-  #endif // SOUND
-  SDL_Surface * tmp;
+#endif // SOUND
+  SDL_Surface * tmp;            // Superficie sobre la que crear la imagen
   //Uint32 bpp;
   score = 0;
   srand(SDL_GetTicks());   /* Seed random number generator: */
@@ -752,17 +745,14 @@ fi = fopen( "./log", "w" );
 #ifdef DEBUG
       printf("\nERR: No Init video \n" "SDL code:\n" "%s\n\n", SDL_GetError());
 #endif
-
       finish();	  exit(1);
     }
     //printf("Checking mode 640x480@8bpp.\n");
     //bpp=SDL_VideoModeOK(640, 480, 8, SDL_HWSURFACE);
-
    // if(!bpp){
    //   printf("Mode not available.\n");
     //  exit(-1);
     //}
-
     //printf("SDL Recommends 640x480@%dbpp.\n", bpp);
     //screen=SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
     screen = SDL_SetVideoMode(WIDTH,HEIGHT,8,SDL_SWSURFACE);
@@ -775,7 +765,6 @@ fi = fopen( "./log", "w" );
 	  finish();
 	  exit(1);
 	}
-
  //     Draw_Init();// Probamos SDL_draw
       SDL_ShowCursor(SDL_ENABLE); SDL_ShowCursor(SDL_DISABLE);
       pixels=(Uint8 *) screen->pixels;
@@ -784,12 +773,20 @@ fi = fopen( "./log", "w" );
       printf(" h (Alto en pixels = %d\n",screen->h);
       printf(" Pitch (Long bytes linea = %d\n",screen->pitch);
 */
-
   /* Load background image: */
 #ifdef GP2X
   tmp = IMG_Load("./data/atari.png");
 #else
-  tmp = IMG_Load("./data/c.dat");
+  //tmp = IMG_Load("./data/c.dat");
+  //tmp = IMG_Load("./lem-pc.png");
+/*
+  SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+  draw_image("./lem-pc.bmp",0,0);
+  SDL_Flip(screen);
+  SDL_Delay(6000);
+*/
+
+
 #endif
   if (tmp == NULL)
     {
@@ -808,8 +805,8 @@ fi = fopen( "./log", "w" );
 #endif
       exit(1);
     }
-
   SDL_FreeSurface(tmp);
+
 #ifdef SOUND
   /* Init sound: */
 
@@ -844,20 +841,19 @@ fi = fopen( "./log", "w" );
 	}
 #endif
 #endif
-
-      next_time=SDL_GetTicks();
+      next_time=SDL_GetTicks();  // Timmers y frame counter
       if_frame=-1;
-
 #ifdef GP2X
 			joystick = SDL_JoystickOpen(0);
 			if (!joystick)
 			{
 			fprintf(fi,"Error al inicializar el JoyStick %s\n",SDL_GetError());
 			finish(); exit(1);
-
 			}
 #endif
 }
+
+
 static inline int wait_fps()
 {
 	int ret=0;

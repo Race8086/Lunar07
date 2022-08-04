@@ -33,6 +33,7 @@ video.h cabecera con prototipos de funciones
 #ifdef TRUE
 #undef TRUE
 #endif
+#define DEBUG
 enum { FALSE, TRUE };
 
 typedef struct color_type {
