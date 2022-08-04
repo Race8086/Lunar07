@@ -55,11 +55,13 @@
 		<Unit filename="gpdata.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="lem-pc.bmp" />
 		<Unit filename="lunar.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="lunar.h" />
 		<Unit filename="math-sll.h" />
+		<Unit filename="test.bmp" />
 		<Unit filename="video.c">
 			<Option compilerVar="CC" />
 		</Unit>

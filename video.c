@@ -1148,7 +1148,7 @@ return s;
 *
 *********************************************************************/
 
-void draw_image(char *cual,int xi,int yi)
+void draw_image(char *cual,int xi,int yi,int modo)
 {
 
 // int i;
@@ -1156,9 +1156,12 @@ void draw_image(char *cual,int xi,int yi)
  SDL_Surface *image;  	// Superfice final de la imagen
  SDL_Rect dest;			// Ubicación de la imagen en la pantalla activa
  int size = WIDTH / ASPECT;
- tmp = IMG_Load(cual);					// Carga imagen y la formatea
+
+ if (modo == 0) size = 1;     // imagen sin escalar
+ tmp = IMG_Load(cual);		// Carga imagen y la formatea
  if (tmp!=NULL)
  {
+
       image = SDL_DisplayFormat(tmp);
 
      if (image == NULL)

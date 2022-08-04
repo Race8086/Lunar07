@@ -95,5 +95,5 @@ void draw_lander(int lander[][4], int x0,int y0, int angle2,int tl, float r,int 
 void draw_explo(int l_exp[][4], int x0,int y0, int angle2, int r,int level,color_type cf);
 void draw_score(float lfuel,int lhy,int lhx,int lym, int lxm);
 void draw_fuel(int nivel, int x, int y);
-void draw_image(char *cual,int xi,int yi);
+void draw_image(char *cual,int xi,int yi,int modo);
 

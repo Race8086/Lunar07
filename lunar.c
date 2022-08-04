@@ -778,7 +778,7 @@ fi = fopen( "./log", "w" );
   tmp = IMG_Load("./data/atari.png");
 #else
   //tmp = IMG_Load("./data/c.dat");
-  //tmp = IMG_Load("./lem-pc.png");
+  tmp = IMG_Load("./lem-pc.bmp");
 /*
   SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
   draw_image("./lem-pc.bmp",0,0);
@@ -2337,7 +2337,7 @@ while (!elegida[j]) j++;
      for (i=0;i<3;i++)
      {
 
-    	draw_image(grafico[elegida[i]][i], size*(32+(i*92)),size*82);
+    	draw_image(grafico[elegida[i]][i], size*(32+(i*92)),size*82,1); // escalar imagen
     	//draw_image("LEM3W.bmp", 32+(i*92),82);
      	draw_text(opciones[cfg_var[IDIOMA]][i], size *(48+pos_opc[cfg_var[IDIOMA]][i]), size *158, size *4, mkcolor(255, 255, 255));
       }
@@ -2371,11 +2371,11 @@ int main(int argc, char * argv[])
 	    Mix_PlayMusic(game_music, -1);
   #endif
   score = 0;
- /*
-  draw_image("test.bmp",0,0);
+
+  draw_image("lem-pc.bmp",0,0,0);
   SDL_Flip(screen);
   SDL_Delay(5000);
- */
+
  game_ended = title();  /* Splash screen */
 /* --- Main app loop! ---*/
   do
