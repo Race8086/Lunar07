@@ -162,14 +162,8 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
                        ( Alunizaje : mensaje N.Amtrong
 
 */
-#define __STDC_FORMAT_MACROS
-
-#define MAX(A,B)  ((A)>(B)?(A):(B))  /* Maximum number between two */
-
-#define MIN(A,B)  ((A)>(B)?(B):(A))  /* Minimum number between two */
 
 #include <inttypes.h>
-
 #include "lunar.h"
 #include "video.h"
 #include <SDL/SDL_gfxPrimitives.h>
@@ -179,10 +173,12 @@ Falta por parametrizar el dibujo de terreno, los indicadores, el campo de estrel
 #define MAX_ANGLE 10
 #define CHAN_THRUST 0
 #define DATAPATH "small/"
-
-//#define SOUND
-//#define MUSIC
-#define DEBUG
+#define __STDC_FORMAT_MACROS
+#define MAX(A,B)  ((A)>(B)?(A):(B))  /* Maximum number between two */
+#define MIN(A,B)  ((A)>(B)?(B):(A))  /* Minimum number between two */
+#define SOUND
+#define MUSIC
+//#define DEBUG
 extern Uint8 *pixels;
 extern Uint32 MUL320[240];
 
@@ -223,10 +219,17 @@ char * sound_names[NUM_SOUNDS] = {
   "./data/k.dat",
   "./data/j.dat"
 };
-
-
-
 char * mus_game_name = "./data/a.dat";
+char * mus_menu_name = "./data/r.dat";
+char * mus_land_name = "./data/s.dat";
+#ifdef SOUND
+    Mix_Chunk *sounds[NUM_SOUNDS]; // efectos de sonido
+    #ifdef MUSIC
+    Mix_Music *game_music;  // música del splash screen y del juego ( si se activa)
+    Mix_Music *menu_music;  // música del menú
+    Mix_Music *land_music;  // The eagle has landed
+    #endif
+#endif
 
 
 /* Globals: */
@@ -237,31 +240,21 @@ SDL_Surface *icon, *portby;
 #ifdef GP2X
 	SDL_Joystick *joystick;
 #endif
-#ifdef SOUND
-    Mix_Chunk *sounds[NUM_SOUNDS];
-    #ifdef MUSIC
-    Mix_Music *game_music;
-    #endif
-#endif
-
 int text_zoom;
 int DT_font;
 char zoom_str[24];
-
 int player_alive, player_die_timer;
 int lives, score, high, level, game_ended;
-
 Uint64 next_time;
 int if_frame;
-
 int cfg_var[4]=
 {0,                            // 0. Idioma ( 0 _esp , 1_ eng
-0,                             // 1. Musica ( 0 _off, 1_on )
+0,                             // 1. Musica ( 0 _on, 1_off )
 0,                             // 2. Rozamiento Hor 0_off 1_on
 1,                             // 3. Fisica Realista 0_off 1_on
 };
-
 enum {IDIOMA,MUSICA,ROZ,FIS};       // Enumerado para las configuraciones
+
 /*************** VARIABLES DEL MODELO *****************************************/
 /*************** Fisica *******************************************************/
 #define PI 3.14159          // Constante PI
@@ -831,12 +824,17 @@ fi = fopen( "./log", "w" );
             }
 	}
 #ifdef MUSIC
+
       game_music = Mix_LoadMUS(mus_game_name);
-      if (game_music == NULL)
+      menu_music = Mix_LoadMUS(mus_menu_name);
+      land_music = Mix_LoadMUS(mus_land_name);
+      if ((game_music == NULL) || (menu_music == NULL)|| (land_music == NULL))
 	{
+
 #ifdef DEBUG
 	  fprintf(fi,"\nERR: loading music file:\n" "%s\n" "SDL code:\n" "%s\n\n", mus_game_name, SDL_GetError());
 #endif
+	  printf("\nERR: loading music files:\n" "%s OR %s\n" "SDL code:\n" "%s\n\n", mus_game_name,mus_menu_name, SDL_GetError());
 	  finish();  exit(1);
 	}
 #endif
@@ -885,6 +883,18 @@ static inline void playsound(int snd)
 	}
       Mix_PlayChannel(which, sounds[snd], 0);
 #endif
+}
+
+static inline void playmusic( Mix_Music *melodia){
+
+  #ifdef MUSIC
+
+	 if (Mix_PlayingMusic()) Mix_HaltMusic();   // Parar música si está tocando alguna
+     Mix_PlayMusic(melodia, -1);             // ejecutar música
+
+  #endif
+
+
 }
 /*****************************************************************************
 * add_score : Calcula la puntación tras el aterrizaje
@@ -1103,7 +1113,7 @@ int check_base(int px,landing_zone bs[])
 }
 
 /***********************************************************************
-* check_ground: Compurba la toma de contacto con la superficie
+* check_ground: Comprueba la toma de contacto con la superficie
 *               en función del nivel de dificultad elegido las condiciones
                 del aterrizaje serán más o menos exigentes
 *   Entradas : h : distancia a tierra
@@ -1128,8 +1138,8 @@ int check_ground(int h, int hx,int x_v, int y_v, int nivel_d)
     {
       case 1:       // Principiante
             {
-              uh = 4;
-              uy = ux = 7;
+              uh = 14;
+              uy = ux = 17;
               break;
             }
       case 2:       // Intermedio
@@ -1414,6 +1424,7 @@ int draw_result (int gas,int scale,int result)
      {
          #ifdef SOUND
            // Sonido explosión. Inicio
+           if (Mix_Playing(CHAN_THRUST)) Mix_HaltChannel(CHAN_THRUST);
            playsound(SND_EXPLODE);
          #endif
          sprintf ( str,"ALUNIZAJE FALLIDO");
@@ -1421,46 +1432,49 @@ int draw_result (int gas,int scale,int result)
          d = 1;
          draw_lander(Plander,x,y,angle,gas,2,scale,mkcolor(0,0,0));
          for (i=0;i<60;i++)
-         {
-          if (j)
-          draw_explo(explo_lem,x,y,angle,(int)rms,scale,mkcolor(255,255,255));
-          else
-          draw_explo(explo_lem,x,y,angle,(int)rms,scale,mkcolor(0,0,0));
-          j=!j;
-          if (i%2)
-          {
-          angle +=5;
-          rms = rand() % 5 +2;
-          if (angle >= 360) angle = 0;
-          }
-          /* Flush and pause! */
-          SDL_Flip(screen);
-          SDL_Delay(1);
-          SDL_Delay(30);
-         }
+         { // repeat 60 times
+              if (j)
+                  draw_explo(explo_lem,x,y,angle,(int)rms,scale,mkcolor(255,255,255));
+              else
+                  draw_explo(explo_lem,x,y,angle,(int)rms,scale,mkcolor(0,0,0));
+              j=!j;
+              if (i%2)
+              {
+                  angle +=5;
+                  rms = rand() % 5 +2;
+                  if (angle >= 360) angle = 0;
+              }
+              /* Flush and pause! */
+              SDL_Flip(screen);
+              SDL_Delay(1);
+              SDL_Delay(30);
+
+         } // repeat 60 times
+         draw_explo(explo_lem,x,y,angle,(int)rms,scale,mkcolor(255,0,0));
+         SDL_Flip(screen);
+         SDL_Delay(6000);
      }
      break;
     case 2:
     {
-     #ifdef SOUND
-       // Sonido Alunizaje. Inicio
-        playsound(SND_EXTRALIFE);
+     #ifdef SOUND // Como utilizamos music para el mensaje debería estar el #ifdef MUSIC
+       // Sonido Alunizaje. Inicio  playsound(SND_EXTRALIFE);
+        if (Mix_Playing(CHAN_THRUST)) Mix_HaltChannel(CHAN_THRUST);
+        Mix_PlayMusic(land_music,1);
      #endif
      sprintf ( str,"ALUNIZAJE CON EXITO");
+     draw_lander(Plander,x,y,angle,0,2,scale,mkcolor(255,255,0));
      c = mkcolor(0,255,0);
      d=2;
+     draw_text(str, 100*size, 220*size , 5*size, c);
+     SDL_Flip(screen);
+     SDL_Delay(14000);
      break;
     }
   }
-     //draw_terrain(moon_a,0,scale);             // Dibuja Terreno
-     //draw_bases(base,0,scale);
 
-     draw_text(str, 100*size, 220*size , 5*size, c);
-  SDL_Flip(screen);
-  SDL_Delay(3000);
-  #ifdef SOUND
-         // Parar sonidos
-  #endif
+
+
   return d;
 }
 
@@ -1509,7 +1523,7 @@ int game(void)
   player_alive = 1;               player_die_timer = 0;
   angle = 90;                     Scx =0;     Scy = 0;
   fSct =0;                        x_scroll=0; y_scroll=0;
-  x=3780;                         y=2200;
+  x=3804;                         y=1200;
   x_pos = x;  y_pos = y;          x_posant = x;  y_posant = y;
   gas =0;                         fuel=10800.0;
 
@@ -1526,6 +1540,10 @@ int game(void)
 //fprintf(fi,"dt\t\t\tx_vel\t\ty_vel\t\tx_pos\t\ty_pos\n");
 //fprintf(fi,"hx\thy\tx\ty\t --- hx\thy\tx\ty\n",hx,hy,x,y);
   /********************** Bucle principal ************************************/
+  #ifdef MUSIC
+   if (!cfg_var[MUSICA]) playmusic( game_music); // Activa música de juego
+   else Mix_HaltMusic();  // Parar música del menú
+  #endif // MUSIC
   do
     {
 
@@ -1865,6 +1883,7 @@ but unused color parameters make more inneficient
       SDL_Flip(screen);
       SDL_Delay(1);
      }
+
    if_frame=wait_fps();
    }
   while (!done);
@@ -2358,7 +2377,7 @@ int main(int argc, char * argv[])
 {
   int done;
   int opcion = 0;
-  //int banderin;
+  int banderin=0;
   setup(); /* --- Inicialización general --- */
   DT_font= DT_LoadFont("./fonts/ConsoleFont.bmp", TRANS_FONT) ;
   score = 0;
@@ -2375,12 +2394,16 @@ int main(int argc, char * argv[])
   draw_image("lem-pc.bmp",0,0,0);
   SDL_Flip(screen);
   SDL_Delay(5000);
-
- game_ended = title();  /* Splash screen */
+  game_ended = title();  /* Splash screen */
 /* --- Main app loop! ---*/
   do
   {
-
+    if (!banderin) {
+         #ifdef MUSIC
+         playmusic(menu_music);
+         banderin = 1;
+         #endif // MUSIC
+    }
     opcion = menu();
 
         switch (opcion)
@@ -2393,6 +2416,7 @@ int main(int argc, char * argv[])
           case 2: // Jugar
           {
             done = game();
+            banderin = 0;
             break;
           }
           case 3: // Menú de configuración
